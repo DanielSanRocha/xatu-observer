@@ -7,7 +7,7 @@ Application for monitoring apis, docker images and services.
 
 ## Installation
 
-First install mysql and redis in your server. Go in src/main/resources/queries and execute all the queries in the folder in a database named xatu. To create a new user, just insert a new entry in the tb_users table, the password field must be hashed with md5. You can hash a string using this project:
+First install mysql and redis in your server. Go in src/main/resources/queries and execute all the queries in the folder in a database named xatu. To create a new user, just insert a new entry in the 'tb_users' table, the password field must be hashed with md5. You can hash a string using this project:
 
 ```bash
 sbt console
@@ -17,7 +17,7 @@ Then
 
 ```scala
 import com.danielsanrocha.xatu.commons.Security
-Security.hash("1234")
+Security.hash("password")
 ```
 
 ## To package in an unique jar

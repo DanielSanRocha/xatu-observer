@@ -6,9 +6,9 @@ import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
 import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api.Database
-import com.danielsanrocha.xatu.repositories.{UserRepository, UserRepositoryImpl}
-import com.danielsanrocha.xatu.services.{UserService, UserServiceImpl}
-import com.danielsanrocha.xatu.controllers.{HealthcheckController, LoginController, NotFoundController, UserController}
+import com.danielsanrocha.xatu.repositories.{UserRepository, UserRepositoryImpl, ServiceRepository, ServiceRepositoryImpl}
+import com.danielsanrocha.xatu.services.{UserService, UserServiceImpl, ServiceService, ServiceServiceImpl}
+import com.danielsanrocha.xatu.controllers.{HealthcheckController, LoginController, NotFoundController, UserController, ServiceController}
 import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
 
 object XatuApp extends XatuServer
@@ -36,9 +36,11 @@ class XatuServer extends HttpServer {
 
   logging.info("Creating repositories...")
   implicit val userRepository: UserRepository = new UserRepositoryImpl()
+  implicit val serviceRepository: ServiceRepository = new ServiceRepositoryImpl()
 
   logging.info("Creating services...")
   private implicit val userService: UserService = new UserServiceImpl()
+  private implicit val serviceService: ServiceService = new ServiceServiceImpl()
 
   logging.info("Getting api configuration...")
   val authorizationHeader = conf.getString("api.auth.header")
@@ -48,6 +50,7 @@ class XatuServer extends HttpServer {
   private val notFoundController = new NotFoundController()
   private val loginController = new LoginController()
   private val userController = new UserController()
+  private val serviceController = new ServiceController()
 
   logging.info("Instantiaing filters...")
   private val exceptionHandlerFilter = new ExceptionHandlerFilter()
@@ -59,6 +62,7 @@ class XatuServer extends HttpServer {
       .filter(requestIdFilter)
       .filter(exceptionHandlerFilter)
       .add(authorizeFilter, userController)
+      .add(authorizeFilter, serviceController)
       .add(loginController)
       .add(healthcheckController)
       .add(notFoundController)
