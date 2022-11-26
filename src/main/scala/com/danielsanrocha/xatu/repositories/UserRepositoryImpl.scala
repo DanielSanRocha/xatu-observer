@@ -1,7 +1,7 @@
 package com.danielsanrocha.xatu.repositories
 
 import scala.language.postfixOps
-import com.twitter.util.Future
+import scala.concurrent.Future
 import java.sql.Timestamp
 import com.danielsanrocha.xatu.models.internals.User
 import slick.jdbc.MySQLProfile.api._
@@ -9,9 +9,7 @@ import slick.jdbc.MySQLProfile.api._
 import com.danielsanrocha.xatu.models.internals.User
 import com.danielsanrocha.xatu.commons.FutureConverters.{RichScalaFuture}
 
-class UserRepositoryImpl(implicit client: Database) extends UserRepository {
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-
+class UserRepositoryImpl(implicit client: Database, implicit val ec: scala.concurrent.ExecutionContext) extends UserRepository {
   class UserTable(tag: Tag) extends Table[User](tag, "tb_users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
@@ -26,10 +24,10 @@ class UserRepositoryImpl(implicit client: Database) extends UserRepository {
   lazy val users = TableQuery[UserTable]
 
   override def getById(id: Long): Future[Option[User]] = {
-    client.run(users.take(1).filter(_.id === id).result.headOption) asTwitter
+    client.run(users.take(1).filter(_.id === id).result.headOption)
   }
 
   override def getByEmail(email: String): Future[Option[User]] = {
-    client.run(users.take(1).filter(_.email === email).result.headOption) asTwitter
+    client.run(users.take(1).filter(_.email === email).result.headOption)
   }
 }

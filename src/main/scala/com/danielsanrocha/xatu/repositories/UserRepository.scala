@@ -1,6 +1,6 @@
 package com.danielsanrocha.xatu.repositories
 
-import com.twitter.util.Future
+import scala.concurrent.Future
 
 import com.danielsanrocha.xatu.models.internals.{User}
 

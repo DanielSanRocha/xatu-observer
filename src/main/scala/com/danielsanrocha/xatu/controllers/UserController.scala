@@ -9,7 +9,7 @@ import com.danielsanrocha.xatu.models.responses.{UserResponse}
 import com.danielsanrocha.xatu.models.internals.{RequestId, TimedCredential}
 import com.danielsanrocha.xatu.services.{UserService}
 
-class UserController(implicit service: UserService) extends Controller {
+class UserController(implicit service: UserService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
   get("/user") { request: Request =>

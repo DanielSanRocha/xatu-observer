@@ -15,6 +15,7 @@ object XatuApp extends XatuServer
 
 class XatuServer extends HttpServer {
   private val logging: Logger = Logger(this.getClass)
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   logging.info("Loading configuration file and acessing it...")
   private implicit val conf: Config = ConfigFactory.load()

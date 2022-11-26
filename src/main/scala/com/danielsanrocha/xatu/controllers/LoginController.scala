@@ -15,7 +15,7 @@ import com.danielsanrocha.xatu.models.responses.{Token, ServerMessage}
 import com.danielsanrocha.xatu.models.requests.{Credential}
 import com.danielsanrocha.xatu.repositories.UserRepository
 
-class LoginController(implicit repository: UserRepository, implicit val cache: Jedis) extends Controller {
+class LoginController(implicit repository: UserRepository, implicit val cache: Jedis, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   val logging: Logger = Logger(this.getClass)
   val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build()
 
