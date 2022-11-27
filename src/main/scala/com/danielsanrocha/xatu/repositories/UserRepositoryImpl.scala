@@ -24,7 +24,7 @@ class UserRepositoryImpl(implicit client: Database, implicit val ec: scala.concu
   lazy val users = TableQuery[UserTable]
 
   override def getById(id: Long): Future[Option[User]] = {
-    client.run(users.take(1).filter(_.id === id).result.headOption)
+    client.run(users.filter(_.id === id).result.headOption)
   }
 
   override def getByEmail(email: String): Future[Option[User]] = {

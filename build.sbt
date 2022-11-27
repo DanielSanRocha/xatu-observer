@@ -8,8 +8,8 @@ lazy val root = (project in file("."))
   )
 
 assemblyMergeStrategy in assembly := {
- case PathList("META-INF", _*) => MergeStrategy.discard
- case _                        => MergeStrategy.first
+  case PathList("META-INF", _*) => MergeStrategy.discard
+  case _                        => MergeStrategy.first
 }
 
 lazy val versions = new {
@@ -23,6 +23,7 @@ lazy val versions = new {
   val jedis = "4.3.0"
   val slick = "3.4.1"
   val mysql = "8.0.31"
+  val scalaj = "2.4.2"
 }
 
 lazy val versionsTest = new {
@@ -43,7 +44,8 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % versions.logback,
   "com.sun.activation" % "javax.activation" % versions.activation,
   "io.jvm.uuid" %% "scala-uuid" % versions.scalaUUID,
-  "redis.clients" % "jedis" % versions.jedis
+  "redis.clients" % "jedis" % versions.jedis,
+  "org.scalaj" %% "scalaj-http" % versions.scalaj
 )
 
 Test / parallelExecution := false

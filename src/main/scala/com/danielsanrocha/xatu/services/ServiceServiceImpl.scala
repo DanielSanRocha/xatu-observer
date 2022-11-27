@@ -14,7 +14,7 @@ class ServiceServiceImpl(implicit repository: ServiceRepository, implicit val ec
   override def getById(id: Long): Future[Option[Service]] = {
     repository.getById(id) map {
       case Some(service) => Some(service)
-      case None => None
+      case None          => None
     }
   }
 
@@ -29,9 +29,14 @@ class ServiceServiceImpl(implicit repository: ServiceRepository, implicit val ec
   override def update(id: Long, s: NewService): Future[Boolean] = {
     repository.getById(id) map {
       case None => throw new NotFoundException(s"Service with id $id not found")
-      case Some(_) => repository.update(id, s) map { _ =>
-        true
-      }
+      case Some(_) =>
+        repository.update(id, s) map { _ =>
+          true
+        }
     } flatten
+  }
+
+  override def getAll(limit: Long, offset: Long): Future[Seq[Service]] = {
+    repository.getAll(limit, offset)
   }
 }

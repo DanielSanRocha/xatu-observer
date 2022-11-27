@@ -1,10 +1,11 @@
 package com.danielsanrocha.xatu.controllers
 
 import com.danielsanrocha.xatu.models.internals.{NewService, RequestId}
-import com.danielsanrocha.xatu.models.requests.{Id, ServiceRequest}
-import com.danielsanrocha.xatu.models.responses.{Created, Deleted, ServerMessage}
+import com.danielsanrocha.xatu.models.requests.{GetAll, Id, ServiceRequest}
+import com.danielsanrocha.xatu.models.responses.{Created, Deleted, HitsResult, ServerMessage}
 import com.danielsanrocha.xatu.services.ServiceService
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.util.logging.Logger
 
@@ -43,6 +44,14 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     service.delete(id.id) map {
       case true  => response.ok(Deleted(id.id, requestId))
       case false => response.notFound(ServerMessage(s"Service with id ${id.id} not found", requestId))
+    }
+  }
+
+  get("/services") { request: GetAll =>
+    service.getAll(request.limit, request.offset) map { services =>
+      {
+        response.ok(HitsResult(services.length, services))
+      }
     }
   }
 }
