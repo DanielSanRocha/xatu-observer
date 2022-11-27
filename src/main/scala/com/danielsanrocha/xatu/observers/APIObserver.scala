@@ -11,13 +11,14 @@ class APIObserver(api: API, implicit val service: APIService) {
 
   private val ex = new ScheduledThreadPoolExecutor(1)
 
-  var _api = api
+  private var _api = api
 
-  def setAPI(api: API) { _api = api }
+  def setAPI(api: API): Unit = { _api = api }
+  def getAPI(): API = _api
 
   private val task = new Runnable {
-    def run() = {
-      val route = s"${_api.host}:${_api.port}${api.healthcheckRoute}"
+    def run(): Unit = {
+      val route = s"${_api.host}:${_api.port}${_api.healthcheckRoute}"
       logging.info(s"Making request to API(id, name) = (${api.id}, ${api.name}) route $route")
       try {
         val result = Http(route).option(HttpOptions.connTimeout(10000)).option(HttpOptions.readTimeout(10000)).execute()

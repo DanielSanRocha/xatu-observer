@@ -16,27 +16,33 @@ class APIObserverManager(implicit val service: APIService, implicit val ec: scal
 
   private val task = new Runnable {
     def run() = {
-      service.getAll(500, 0) map { apis =>
-        apis.map(api => {
+      service.getAll(1000, 0) map { apis =>
+        apis.foreach(api => {
           observers.get(api.id) match {
-            case Some(obs) => obs.setAPI(api)
-            case None => {
+            case Some(obs) =>
+              logging.debug(s"Updating parameters for API(${api.id}, ${api.name})")
+              obs.setAPI(api)
+
+            case None =>
               logging.info(s"Creating observer for api with id ${api.id} and name ${api.name}")
               val observer = new APIObserver(api, service)
               observers.addOne((api.id, observer))
-            }
+
           }
         })
 
-        val idSet = Set(apis.map(_.id))
-        observers.map(tuple => {
+        val idSet = apis.map(_.id)
+        logging.debug(s"Ids on database ${idSet.mkString(",")}. Killing observers of deleted apis...")
+
+        observers.foreach(tuple => {
           val id = tuple._1
           val obs = tuple._2
 
-          if (!idSet.contains(Seq(id))) {
-            logging.info(s"Killing observer for api with id ${obs._api.id} and name ${obs._api.name}")
-            obs.stop()
-            observers.remove(id)
+          idSet.find(_ == id) match {
+            case None =>
+              logging.info(s"Killing observer for api with id ${obs.getAPI().id} and name ${obs.getAPI().name}")
+              obs.stop()
+              observers.remove(id)
           }
         })
       }
