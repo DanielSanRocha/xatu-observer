@@ -1,15 +1,15 @@
 package com.danielsanrocha.xatu
 
-import com.typesafe.config.{Config, ConfigFactory}
-import com.twitter.util.logging.Logger
+import com.danielsanrocha.xatu.controllers._
+import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
+import com.danielsanrocha.xatu.repositories.{ServiceRepository, ServiceRepositoryImpl, UserRepository, UserRepositoryImpl}
+import com.danielsanrocha.xatu.services.{ServiceService, ServiceServiceImpl, UserService, UserServiceImpl}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
+import com.twitter.util.logging.Logger
+import com.typesafe.config.{Config, ConfigFactory}
 import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api.Database
-import com.danielsanrocha.xatu.repositories.{UserRepository, UserRepositoryImpl, ServiceRepository, ServiceRepositoryImpl}
-import com.danielsanrocha.xatu.services.{UserService, UserServiceImpl, ServiceService, ServiceServiceImpl}
-import com.danielsanrocha.xatu.controllers.{HealthcheckController, LoginController, NotFoundController, UserController, ServiceController}
-import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
 
 object XatuApp extends XatuServer
 
@@ -24,6 +24,7 @@ class XatuServer extends HttpServer {
   val appName = conf.getString("api.name")
 
   override protected def defaultHttpPort: String = s":${port}"
+
   override protected def defaultHttpServerName: String = appName
 
   logging.info("Loading slick MySQLClient...")

@@ -1,3 +1,8 @@
 package com.danielsanrocha.xatu.models.requests
 
-final case class Id(id: Long)
+import com.twitter.finatra.http.annotations.RouteParam
+
+final case class Id
+(
+  @RouteParam id: Long
+)

@@ -5,8 +5,9 @@ import java.sql.Timestamp
 case class Service(
     id: Long,
     name: String,
-    logfileRegex: String,
-    pidfile: String,
+    logFileDirectory: String,
+    logFileRegex: String,
+    pidFile: String,
     createDate: Timestamp,
     updateDate: Timestamp
 )
