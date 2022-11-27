@@ -16,7 +16,7 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     logging.info(s"(x-request-id - $requestId) GET service route called...")
     service.getById(id.id) map {
       case Some(service) => response.ok(service)
-      case None => response.notFound(ServerMessage(s"Service with ${id.id} not found", requestId))
+      case None          => response.notFound(ServerMessage(s"Service with ${id.id} not found", requestId))
     }
   }
 
@@ -31,8 +31,8 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     logging.info(s"(x-request-id - $requestId) PUT service/:id route called...")
 
     service.update(s.id, NewService(s.name, s.logFileDirectory, s.logFileDirectory, s.pidFile)) map {
-      case true => response.ok(ServerMessage(s"Updated service with id ${s.id}", requestId))
-      case false => response.notFound(ServerMessage(s"Service with id ${s.id} not found", requestId)) ::::::
+      case true  => response.ok(ServerMessage(s"Updated service with id ${s.id}", requestId))
+      case false => response.notFound(ServerMessage(s"Service with id ${s.id} not found", requestId))
     }
   }
 
@@ -41,7 +41,7 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     logging.info(s"(x-request-id - $requestId) Delete service route called...")
 
     service.delete(id.id) map {
-      case true => response.ok(Deleted(id.id, requestId))
+      case true  => response.ok(Deleted(id.id, requestId))
       case false => response.notFound(ServerMessage(s"Service with id ${id.id} not found", requestId))
     }
   }
