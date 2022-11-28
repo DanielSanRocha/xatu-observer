@@ -3,7 +3,7 @@
 ![xatu](assets/xatu.jpg?raw=true)
 
 
-Application for monitoring apis, docker images and services.
+Application for monitoring apis, docker images and services. Also check [xatu-observer-web](https://github.com/DanielSanRocha/xatu-observer-web) for a web frontend to this service.
 
 ## Installation
 
