@@ -48,17 +48,10 @@ StandardError=append:/var/log/xatu/error.log
 WantedBy=multi-user.target
 ```
 
-To create a new user, just insert a new entry in the 'tb_users' table, the password field must be hashed with md5. You can hash a string using this project, clone the project and run:
+To create a new user, just insert a new entry in the 'tb_users' table, the password field must be hashed with md5. You can hash a string using the jar file:
 
 ```bash
-sbt console
-```
-
-Then
-
-```scala
-import com.danielsanrocha.xatu.commons.Security
-Security.hash("password")
+java -jar xatu-observer-assembly-{version}.jar hash 1234
 ```
 
 ## To package in an unique jar with all dependencies
@@ -69,4 +62,4 @@ sbt assembly
 
 the generated jar file will be inside the folder 'target/scala-2.13'.
 
-Made With Love
+Made With Love ❤
