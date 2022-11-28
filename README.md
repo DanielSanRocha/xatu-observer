@@ -7,7 +7,7 @@ Application for monitoring apis, docker images and services. Also check [xatu-ob
 
 ## Installation
 
-First install mysql and redis in your server. Download the latest jar file in the releases page. Create a empty database and export the following environment variables replacing with the values for your server: 
+First install mysql, elasticsearch and redis in your server. Download the latest jar file in the releases page. Create a empty database and export the following environment variables replacing with the values for your server: 
 
 ```bash
 MYSQL_URL="jdbc:mysql://localhost:3306/xatu?autoReconnect=true&useSSL=false"
@@ -15,11 +15,15 @@ MYSQL_USER="root"
 MYSQL_PASSWORD="root"
 REDIS_HOST="localhost"
 REDIS_PORT="6379"
+ELASTIC_SEARCH_HOST="localhost"
+ELASTIC_SEARCH_PORT="9200"
+ELASTIC_SEARCH_LOG_INDEX="xatu-logs"
 ```
 
 After  that run 
 ```bash
 java -jar xatu-observer-assembly-{version}.jar createTables
+java -jar xatu-observer-assembly-{version}.jar createIndex
 ```
 
 You can start the server with
@@ -38,6 +42,7 @@ Description=XatuObserver
 Environment="PORT=<PORT>"
 Environment="MYSQL_USER=<MYSQL_USER>"
 Environment="MYSQL_PASSWORD=<MYSQL_PASSWORD>"
+...
 User=root
 ExecStart=java -jar /path/to/jarfile/xatu-observer-assembly-{version}.jar start
 WorkingDirectory=/home/xatu

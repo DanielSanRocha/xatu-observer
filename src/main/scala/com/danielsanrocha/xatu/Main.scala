@@ -1,12 +1,15 @@
 package com.danielsanrocha.xatu
 
-import com.danielsanrocha.xatu.commons.Security
 import com.twitter.util.logging.Logger
 import slick.jdbc.MySQLProfile.api._
 
 import scala.io.Source
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
+import com.danielsanrocha.xatu.commons.Security
+import com.danielsanrocha.xatu.repositories.{LogRepository, LogRepositoryImpl}
 
 object Main extends App {
   private val usage = """
@@ -14,6 +17,7 @@ object Main extends App {
 
   start: Start the server
   createTables: Create tables on the database
+  createIndex: Create ES index for logs
   hash <password>: Hash a password
 
   """
@@ -22,8 +26,14 @@ object Main extends App {
   if (args.length == 0) {
     println(usage)
   } else {
+    logging.info("Loading execution context...")
+    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
     logging.info("Loading slick MySQLClient...")
     implicit val client: Database = Database.forConfig("mysql")
+
+    logging.info("Creating logs repository...")
+    implicit val logRepository: LogRepository = new LogRepositoryImpl("elasticsearch", ec)
 
     args(0) match {
       case "start" => {
@@ -39,6 +49,9 @@ object Main extends App {
 
         val APIQuery = Source.fromResource("queries/CreateAPIsTable.sql").mkString
         Await.result(client.run(sqlu"#$APIQuery"), Duration.Inf)
+      }
+      case "createIndex" => {
+        Await.result(logRepository.createIndex(), atMost = 10 second)
       }
       case "hash" => {
         args.length match {

@@ -24,6 +24,7 @@ lazy val versions = new {
   val slick = "3.4.1"
   val mysql = "8.0.31"
   val scalaj = "2.4.2"
+  val uJson = "2.0.0"
 }
 
 lazy val versionsTest = new {
@@ -45,7 +46,8 @@ libraryDependencies ++= Seq(
   "com.sun.activation" % "javax.activation" % versions.activation,
   "io.jvm.uuid" %% "scala-uuid" % versions.scalaUUID,
   "redis.clients" % "jedis" % versions.jedis,
-  "org.scalaj" %% "scalaj-http" % versions.scalaj
+  "org.scalaj" %% "scalaj-http" % versions.scalaj,
+  "com.lihaoyi" %% "upickle" % versions.uJson
 )
 
 Test / parallelExecution := false

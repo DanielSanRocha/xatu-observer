@@ -1,0 +1,9 @@
+{
+  "mappings" : {
+    "properties" : {
+      "service_name" : { "type" : "keyword" },
+      "filename" : { "type" : "keyword" },
+      "created_at" : { "type" : "date" }
+    }
+  }
+}

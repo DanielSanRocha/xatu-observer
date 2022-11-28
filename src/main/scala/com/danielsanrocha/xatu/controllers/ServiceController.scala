@@ -31,7 +31,7 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) PUT service/:id route called...")
 
-    service.update(s.id, NewService(s.name, s.logFileDirectory, s.logFileDirectory, s.pidFile)) map {
+    service.update(s.id, NewService(s.name, s.logFileDirectory, s.logFileRegex, s.pidFile)) map {
       case true  => response.ok(ServerMessage(s"Updated service with id ${s.id}", requestId))
       case false => response.notFound(ServerMessage(s"Service with id ${s.id} not found", requestId))
     }

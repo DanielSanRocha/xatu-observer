@@ -2,9 +2,9 @@ package com.danielsanrocha.xatu
 
 import com.danielsanrocha.xatu.controllers._
 import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
-import com.danielsanrocha.xatu.managers.APIObserverManager
-import com.danielsanrocha.xatu.repositories.{APIRepository, APIRepositoryImpl, ServiceRepository, ServiceRepositoryImpl, UserRepository, UserRepositoryImpl}
-import com.danielsanrocha.xatu.services.{APIService, APIServiceImpl, ServiceService, ServiceServiceImpl, UserService, UserServiceImpl}
+import com.danielsanrocha.xatu.managers.{APIObserverManager, LogServiceObserverManager}
+import com.danielsanrocha.xatu.repositories.{APIRepository, APIRepositoryImpl, LogRepository, ServiceRepository, ServiceRepositoryImpl, UserRepository, UserRepositoryImpl}
+import com.danielsanrocha.xatu.services.{APIService, APIServiceImpl, LogService, LogServiceImpl, ServiceService, ServiceServiceImpl, UserService, UserServiceImpl}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.util.logging.Logger
@@ -12,9 +12,8 @@ import com.typesafe.config.{Config, ConfigFactory}
 import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api.Database
 
-class XatuServer(implicit val client: Database) extends HttpServer {
+class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository) extends HttpServer {
   private val logging: Logger = Logger(this.getClass)
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   logging.info("Loading configuration file and acessing it...")
   private implicit val conf: Config = ConfigFactory.load()
@@ -40,6 +39,7 @@ class XatuServer(implicit val client: Database) extends HttpServer {
   private implicit val userService: UserService = new UserServiceImpl()
   private implicit val serviceService: ServiceService = new ServiceServiceImpl()
   private implicit val apiService: APIService = new APIServiceImpl()
+  private implicit val logService: LogService = new LogServiceImpl()
 
   logging.info("Getting api configuration...")
   val authorizationHeader = conf.getString("api.auth.header")
@@ -51,14 +51,16 @@ class XatuServer(implicit val client: Database) extends HttpServer {
   private val userController = new UserController()
   private val serviceController = new ServiceController()
   private val apiController = new APIController()
+  private val logController = new LogController()
 
   logging.info("Instantiaing filters...")
   private val exceptionHandlerFilter = new ExceptionHandlerFilter()
   private val requestIdFilter = new RequestIdFilter()
   private val authorizeFilter = new AuthorizeFilter(authorizationHeader, cache)
 
-  logging.info("Instantiating Observer Managers...")
+  logging.info("Instantiating Observers Managers...")
   private val apiObserverManager = new APIObserverManager()
+  private val logServiceManager = new LogServiceObserverManager()
 
   override protected def configureHttp(router: HttpRouter): Unit = {
     router
@@ -67,6 +69,7 @@ class XatuServer(implicit val client: Database) extends HttpServer {
       .add(authorizeFilter, userController)
       .add(authorizeFilter, serviceController)
       .add(authorizeFilter, apiController)
+      .add(authorizeFilter, logController)
       .add(loginController)
       .add(healthcheckController)
       .add(notFoundController)
