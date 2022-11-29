@@ -7,7 +7,7 @@ Application for monitoring apis, docker images and services. Also check [xatu-ob
 
 ## Installation
 
-First install mysql, elasticsearch and redis in your server. Download the latest jar file in the releases page. Create a empty database and export the following environment variables replacing with the values for your server: 
+First install mysql, elasticsearch (version 7) and redis in your server. Download the latest jar file in the releases page. Create a empty database and export the following environment variables replacing with the values for your server: 
 
 ```bash
 MYSQL_URL="jdbc:mysql://localhost:3306/xatu?autoReconnect=true&useSSL=false"
