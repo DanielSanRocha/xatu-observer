@@ -11,6 +11,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.danielsanrocha.xatu.models.internals.LogService
+import com.danielsanrocha.xatu.exceptions.BadArgumentException
 
 class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.ExecutionContext) extends LogRepository {
   private val logging: Logger = Logger(this.getClass)
@@ -69,10 +70,14 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
 
   override def search(query: String): Future[Seq[LogService]] = {
     Future {
+      if (query.contains("\"")) {
+        throw new BadArgumentException("Invalid query contains \"")
+      }
+
       val route = s"$esHost:$esPort/$esIndex/_search"
       logging.debug(s"Making a search for logs with query `$query`")
 
-      val data = s"{\"query\": {\"query_string\" : {\"query\": \"$query\"}}}"
+      val data = s"{\"sort\":[{\"created_at\":{\"order\": \"asc\"}}], \"query\": {\"query_string\" : {\"query\": \"$query\"}}}"
 
       logging.debug(s"Search post data: $data")
 
@@ -91,7 +96,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
 
       val body = ujson.read(result.body)
 
-      (body("hits")("hits").arr map { hit =>
+      body("hits")("hits").arr map { hit =>
         val source = hit("_source")
         LogService(
           source("service_id").toString().toLong,
@@ -100,7 +105,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
           source("message").str,
           source("created_at").toString().toLong
         )
-      } toSeq) sortWith (_.createdAt > _.createdAt)
+      } toSeq
     }
   }
 }

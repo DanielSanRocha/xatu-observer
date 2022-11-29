@@ -25,6 +25,7 @@ lazy val versions = new {
   val mysql = "8.0.31"
   val scalaj = "2.4.2"
   val uJson = "2.0.0"
+  val dockerJava = "3.0.14"
 }
 
 lazy val versionsTest = new {
@@ -47,7 +48,8 @@ libraryDependencies ++= Seq(
   "io.jvm.uuid" %% "scala-uuid" % versions.scalaUUID,
   "redis.clients" % "jedis" % versions.jedis,
   "org.scalaj" %% "scalaj-http" % versions.scalaj,
-  "com.lihaoyi" %% "upickle" % versions.uJson
+  "com.lihaoyi" %% "upickle" % versions.uJson,
+  "com.github.docker-java" % "docker-java" % versions.dockerJava
 )
 
 Test / parallelExecution := false

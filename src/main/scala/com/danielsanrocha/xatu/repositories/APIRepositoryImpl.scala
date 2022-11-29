@@ -10,19 +10,12 @@ import scala.language.postfixOps
 class APIRepositoryImpl(implicit client: Database, implicit val ec: scala.concurrent.ExecutionContext) extends APIRepository {
   class APITable(tag: Tag) extends Table[API](tag, "tb_apis") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
     def name = column[String]("name")
-
     def host = column[String]("host")
-
     def port = column[Int]("port")
-
     def healthcheckRoute = column[String]("healthcheck_route")
-
     def status = column[Char]("status")
-
     def createDate = column[Timestamp]("create_date")
-
     def updateDate = column[Timestamp]("update_date")
 
     def * = (id, name, host, port, healthcheckRoute, status, createDate, updateDate) <> (API.tupled, API.unapply)

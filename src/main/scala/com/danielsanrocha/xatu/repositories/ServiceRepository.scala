@@ -10,4 +10,5 @@ trait ServiceRepository {
   def delete(id: Long): Future[Boolean]
   def update(id: Long, service: NewService): Future[Long]
   def getAll(limit: Long, offset: Long): Future[Seq[Service]]
+  def setStatus(id: Long, status: Char): Future[Int]
 }

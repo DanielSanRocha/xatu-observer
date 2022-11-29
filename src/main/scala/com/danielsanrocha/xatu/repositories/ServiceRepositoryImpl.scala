@@ -14,9 +14,10 @@ class ServiceRepositoryImpl(implicit client: Database, implicit val ec: scala.co
     def logFileDirectory = column[String]("log_file_directory")
     def logFileRegex = column[String]("log_file_regex")
     def pidFile = column[String]("pid_file")
+    def status = column[Char]("status")
     def createDate = column[Timestamp]("create_date")
     def updateDate = column[Timestamp]("update_date")
-    def * = (id, name, logFileDirectory, logFileRegex, pidFile, createDate, updateDate) <> (Service.tupled, Service.unapply)
+    def * = (id, name, logFileDirectory, logFileRegex, pidFile, status, createDate, updateDate) <> (Service.tupled, Service.unapply)
   }
 
   lazy val services = TableQuery[ServiceTable]
@@ -48,5 +49,9 @@ class ServiceRepositoryImpl(implicit client: Database, implicit val ec: scala.co
 
   override def getAll(limit: Long, offset: Long): Future[Seq[Service]] = {
     client.run(services.take(limit).drop(offset).result)
+  }
+
+  override def setStatus(id: Long, status: Char): Future[Int] = {
+    client.run(services.filter(_.id === id).map(s => (s.status)).update(status))
   }
 }

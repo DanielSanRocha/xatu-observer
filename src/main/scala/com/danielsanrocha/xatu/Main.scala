@@ -49,6 +49,9 @@ object Main extends App {
 
         val APIQuery = Source.fromResource("queries/CreateAPIsTable.sql").mkString
         Await.result(client.run(sqlu"#$APIQuery"), Duration.Inf)
+
+        val containerQuery = Source.fromResource("queries/CreateContainersTable.sql").mkString
+        Await.result(client.run(sqlu"#$containerQuery"), Duration.Inf)
       }
       case "createIndex" => {
         Await.result(logRepository.createIndex(), atMost = 10 second)

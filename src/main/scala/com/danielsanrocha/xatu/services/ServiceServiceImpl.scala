@@ -39,4 +39,8 @@ class ServiceServiceImpl(implicit repository: ServiceRepository, implicit val ec
   override def getAll(limit: Long, offset: Long): Future[Seq[Service]] = {
     repository.getAll(limit, offset)
   }
+
+  override def setStatus(id: Long, status: Char): Future[Unit] = {
+    repository.setStatus(id, status) map { _ => }
+  }
 }

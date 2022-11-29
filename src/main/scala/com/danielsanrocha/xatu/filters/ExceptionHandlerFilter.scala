@@ -13,7 +13,7 @@ import com.twitter.util.Future
 
 import com.danielsanrocha.xatu.models.internals.{RequestId}
 import com.danielsanrocha.xatu.models.responses.{ServerMessage}
-import com.danielsanrocha.xatu.exceptions.{ForbiddenException, NotFoundException}
+import com.danielsanrocha.xatu.exceptions.{ForbiddenException, BadArgumentException, NotFoundException}
 
 class ExceptionHandlerFilter() extends SimpleFilter[Request, Response] {
   val logging: Logger = Logger(this.getClass)
@@ -31,6 +31,7 @@ class ExceptionHandlerFilter() extends SimpleFilter[Request, Response] {
         val statusCode = e match {
           case _: ForbiddenException        => 403
           case _: NotFoundException         => 404
+          case _: BadArgumentException      => 400
           case _: JsonParseException        => 400
           case _: CaseClassMappingException => 400
           case _: Exception                 => 500
