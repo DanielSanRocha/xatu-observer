@@ -3,6 +3,7 @@
     "properties" : {
       "service_name" : { "type" : "keyword" },
       "filename" : { "type" : "keyword" },
+      "container_name": {"type":  "keyword"},
       "created_at" : { "type" : "date" }
     }
   }

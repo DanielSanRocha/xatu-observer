@@ -1,10 +1,15 @@
 package com.danielsanrocha.xatu.models.responses
 
-import com.danielsanrocha.xatu.models.internals.{ContainerInfo}
+import java.sql.Timestamp
+import com.danielsanrocha.xatu.models.internals.{Container, ContainerInfo, Data}
 
 case class ContainerResponse(
-    id: Long,
-    name: String,
+    override val id: Long,
+    override val name: String,
     info: Option[ContainerInfo],
-    status: Char
-)
+    status: Char,
+    createDate: Timestamp,
+    updateDate: Timestamp
+) extends Data {
+  def container: Container = Container(id, name, createDate, updateDate)
+}

@@ -4,14 +4,14 @@ import scala.concurrent.Future
 import scala.io.Source
 import scala.language.postfixOps
 import java.net.URLEncoder
-
 import scalaj.http.{Http, HttpOptions}
 import com.twitter.util.logging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.danielsanrocha.xatu.models.internals.LogService
+import com.danielsanrocha.xatu.models.internals.{LogContainer, LogService}
 import com.danielsanrocha.xatu.exceptions.BadArgumentException
+import com.danielsanrocha.xatu.models.internals.Log.Log
 
 class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.ExecutionContext) extends LogRepository {
   private val logging: Logger = Logger(this.getClass)
@@ -38,7 +38,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
           .put(indexMapping)
           .execute()
 
-        if (result.code != 200) {
+        if (result.code != 201) {
           throw new Exception(s"ES returned status ${result.code}!")
         }
 
@@ -61,6 +61,24 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
         .put(jsonMapper.writeValueAsString(log))
         .execute()
 
+      if (result.code != 201) {
+        logging.error(s"ES Response: ${result.body}")
+        throw new Exception(s"Elasticsearch returned status ${result.code} while indexing document with name $documentId")
+      }
+    }
+  }
+
+  override def create(documentId: String, log: LogContainer): Future[Unit] = {
+    Future {
+      val route = s"$esHost:$esPort/$esIndex/_doc/$documentId"
+      logging.debug(s"Indexing log on route $route...")
+      val result = Http(route)
+        .option(HttpOptions.connTimeout(10000))
+        .option(HttpOptions.readTimeout(10000))
+        .header("content-type", "application/json")
+        .put(jsonMapper.writeValueAsString(log))
+        .execute()
+
       if (result.code != 200) {
         logging.error(s"ES Response: ${result.body}")
         throw new Exception(s"Elasticsearch returned status ${result.code} while indexing document with name $documentId")
@@ -68,7 +86,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
     }
   }
 
-  override def search(query: String): Future[Seq[LogService]] = {
+  override def search(query: String): Future[Seq[Log]] = {
     Future {
       if (query.contains("\"")) {
         throw new BadArgumentException("Invalid query contains \"")
@@ -98,13 +116,21 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
 
       body("hits")("hits").arr map { hit =>
         val source = hit("_source")
-        LogService(
-          source("service_id").toString().toLong,
-          source("service_name").str,
-          source("filename").str,
-          source("message").str,
-          source("created_at").toString().toLong
-        )
+
+        source("service_id") match {
+          case service_id if service_id != null =>
+            Left(
+              LogService(
+                service_id.toString().toLong,
+                source("service_name").str,
+                source("filename").str,
+                source("message").str,
+                source("created_at").toString().toLong
+              )
+            )
+          case null =>
+            Right(LogContainer(source("container_id").toString.toLong, source("container_name").str, source("message").str, source("created_at").toString().toLong))
+        }
       } toSeq
     }
   }

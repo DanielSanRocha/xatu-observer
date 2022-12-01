@@ -6,15 +6,15 @@ import java.util.{List => JavaList}
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.language.postfixOps
-import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.api.DockerClient
+
 import com.github.dockerjava.api.model.{Container => DockerContainer}
 import com.danielsanrocha.xatu.models.internals.{Container, ContainerInfo, NewContainer}
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.repositories.ContainerRepository
 
-class ContainerServiceImpl(implicit repository: ContainerRepository, implicit val ec: scala.concurrent.ExecutionContext) extends ContainerService {
+class ContainerServiceImpl(implicit repository: ContainerRepository, implicit val dockerClient: DockerClient, implicit val ec: scala.concurrent.ExecutionContext) extends ContainerService {
   private val logging: Logger = Logger(this.getClass)
-  val dockerClient = DockerClientBuilder.getInstance().build();
 
   override def getById(id: Long): Future[Option[Container]] = {
     repository.getById(id) map {
@@ -53,7 +53,7 @@ class ContainerServiceImpl(implicit repository: ContainerRepository, implicit va
           case None    => None
         }
 
-        ContainerResponse(container.id, name, info, status)
+        ContainerResponse(container.id, name, info, status, container.createDate, container.updateDate)
       }
     }
   }

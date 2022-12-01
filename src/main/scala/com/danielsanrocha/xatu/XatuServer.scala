@@ -1,37 +1,39 @@
 package com.danielsanrocha.xatu
 
-import com.danielsanrocha.xatu.controllers._
-import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
-import com.danielsanrocha.xatu.managers.{APIObserverManager, LogServiceObserverManager, ServiceObserverManager}
-import com.danielsanrocha.xatu.repositories.{
-  APIRepository,
-  APIRepositoryImpl,
-  LogRepository,
-  ServiceRepository,
-  ServiceRepositoryImpl,
-  UserRepository,
-  UserRepositoryImpl,
-  ContainerRepository,
-  ContainerRepositoryImpl
-}
-import com.danielsanrocha.xatu.services.{
-  APIService,
-  APIServiceImpl,
-  LogService,
-  LogServiceImpl,
-  ServiceService,
-  ServiceServiceImpl,
-  UserService,
-  UserServiceImpl,
-  ContainerService,
-  ContainerServiceImpl
-}
+import com.github.dockerjava.core.DockerClientBuilder
+import com.github.dockerjava.api.DockerClient
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.util.logging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api.Database
+import com.danielsanrocha.xatu.controllers._
+import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
+import com.danielsanrocha.xatu.managers.{APIObserverManager, LogContainerObserverManager, LogServiceObserverManager, ServiceObserverManager}
+import com.danielsanrocha.xatu.repositories.{
+  APIRepository,
+  APIRepositoryImpl,
+  ContainerRepository,
+  ContainerRepositoryImpl,
+  LogRepository,
+  ServiceRepository,
+  ServiceRepositoryImpl,
+  UserRepository,
+  UserRepositoryImpl
+}
+import com.danielsanrocha.xatu.services.{
+  APIService,
+  APIServiceImpl,
+  ContainerService,
+  ContainerServiceImpl,
+  LogService,
+  LogServiceImpl,
+  ServiceService,
+  ServiceServiceImpl,
+  UserService,
+  UserServiceImpl
+}
 
 class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository) extends HttpServer {
   private val logging: Logger = Logger(this.getClass)
@@ -47,9 +49,12 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   override protected def defaultHttpServerName: String = appName
 
   logging.info("Connecting to redis...")
-  val redisHost = conf.getString("redis.host")
-  val redisPort = conf.getInt("redis.port")
-  implicit val cache: Jedis = new JedisPool(redisHost, redisPort).getResource()
+  private val redisHost = conf.getString("redis.host")
+  private val redisPort = conf.getInt("redis.port")
+  implicit val cache: Jedis = new JedisPool(redisHost, redisPort).getResource
+
+  logging.info("Instantiating docker client...")
+  private implicit val dockerClient: DockerClient = DockerClientBuilder.getInstance.build
 
   logging.info("Creating repositories...")
   implicit val userRepository: UserRepository = new UserRepositoryImpl()
@@ -65,7 +70,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private implicit val containerService: ContainerService = new ContainerServiceImpl()
 
   logging.info("Getting api configuration...")
-  val authorizationHeader = conf.getString("api.auth.header")
+  private val authorizationHeader = conf.getString("api.auth.header")
 
   logging.info("Instatiating controllers...")
   private val healthcheckController = new HealthcheckController()
@@ -83,9 +88,12 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private val authorizeFilter = new AuthorizeFilter(authorizationHeader, cache)
 
   logging.info("Instantiating Observers Managers...")
-  private val apiObserverManager = new APIObserverManager()
-  private val logServiceManager = new LogServiceObserverManager()
-  private val serviceObserverManager = new ServiceObserverManager()
+  private implicit val apiObserverManager: APIObserverManager = new APIObserverManager()
+  private implicit val logServiceManager: LogServiceObserverManager = new LogServiceObserverManager()
+  private implicit val serviceObserverManager: ServiceObserverManager = new ServiceObserverManager()
+  private implicit val logContainerManager: LogContainerObserverManager = new LogContainerObserverManager()
+
+  private val statusController = new StatusController()
 
   override protected def configureHttp(router: HttpRouter): Unit = {
     router
@@ -96,6 +104,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
       .add(authorizeFilter, apiController)
       .add(authorizeFilter, logController)
       .add(authorizeFilter, containerController)
+      .add(authorizeFilter, statusController)
       .add(loginController)
       .add(healthcheckController)
       .add(notFoundController)
