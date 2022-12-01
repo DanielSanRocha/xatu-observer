@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `tb_containers` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `name` varchar(200) NOT NULL,
+    `name` varchar(200) NOT NULL UNIQUE,
     `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (`id`)

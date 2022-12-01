@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `tb_services` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `name` varchar(200) NOT NULL,
+    `name` varchar(200) NOT NULL UNIQUE,
     `log_file_directory` varchar(200) NOT NULL,
     `log_file_regex` varchar(200) NOT NULL,
     `pid_file` varchar(200) NOT NULL,

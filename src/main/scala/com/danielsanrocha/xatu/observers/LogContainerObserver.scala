@@ -23,31 +23,29 @@ class LogContainerObserver(
 
   private var now = (System.currentTimeMillis() / 1000).toInt
 
-  protected val task: Runnable = new Runnable {
-    def run(): Unit = {
-      val response = dockerClient
-        .logContainerCmd(_data.info.head.containerId)
-        .withFollowStream(true)
-        .withStdErr(true)
-        .withStdOut(true)
-        .withSince(now)
-        .withTimestamps(true)
+  override protected lazy val task: Runnable = () => {
+    val response = dockerClient
+      .logContainerCmd(_data.info.head.containerId)
+      .withFollowStream(true)
+      .withStdErr(true)
+      .withStdOut(true)
+      .withSince(now)
+      .withTimestamps(true)
 
-      try {
-        response.exec(new LogContainerResultCallback() {
-          override def onNext(item: Frame): Unit = {
-            val log = LogContainer(_data.id, _data.name, new String(item.getPayload, StandardCharsets.UTF_8), System.currentTimeMillis())
-            logging.debug(s"Log found! Container(${_data.id}, ${_data.name}), indexing it ...")
-            logService.create(log) recover { case e: Exception =>
-              logging.warn(s"Error indexing logs for container ${_data.name} -> Error: ${e.getMessage}")
-            }
+    try {
+      response.exec(new LogContainerResultCallback() {
+        override def onNext(item: Frame): Unit = {
+          val log = LogContainer(_data.id, _data.name, new String(item.getPayload, StandardCharsets.UTF_8), System.currentTimeMillis())
+          logging.debug(s"Log found! Container(${_data.id}, ${_data.name}), indexing it ...")
+          logService.create(log) recover { case e: Exception =>
+            logging.warn(s"Error indexing logs for container ${_data.name} -> Error: ${e.getMessage}")
           }
-        })
-      } catch {
-        case e: Exception => logging.warn(s"Error getting logs of container ${_data.info.head.containerId} - ${c.name}. Error: ${e.getMessage}")
-      }
-
-      now = (System.currentTimeMillis() / 1000).toInt
+        }
+      })
+    } catch {
+      case e: Exception => logging.warn(s"Error getting logs of container ${_data.info.head.containerId} - ${c.name}. Error: ${e.getMessage}")
     }
+
+    now = (System.currentTimeMillis() / 1000).toInt
   }
 }

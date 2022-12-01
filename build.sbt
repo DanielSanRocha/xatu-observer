@@ -26,6 +26,7 @@ lazy val versions = new {
   val scalaj = "2.4.2"
   val uJson = "2.0.0"
   val dockerJava = "3.0.14"
+  val junixsocket = "2.5.2"
 }
 
 lazy val versionsTest = new {
@@ -39,6 +40,7 @@ libraryDependencies ++= Seq(
   "com.twitter" %% "finatra-http" % versions.finatra,
   "com.twitter" %% "finatra-thrift" % versions.finatra,
   "com.twitter" %% "finagle-http" % versions.finagle,
+  "com.twitter" %% "finagle-stats" % versions.finagle,
   "com.typesafe.slick" %% "slick" % versions.slick,
   "com.typesafe.slick" %% "slick-hikaricp" % versions.slick,
   "mysql" % "mysql-connector-java" % versions.mysql,
@@ -49,7 +51,8 @@ libraryDependencies ++= Seq(
   "redis.clients" % "jedis" % versions.jedis,
   "org.scalaj" %% "scalaj-http" % versions.scalaj,
   "com.lihaoyi" %% "upickle" % versions.uJson,
-  "com.github.docker-java" % "docker-java" % versions.dockerJava
+  "com.github.docker-java" % "docker-java" % versions.dockerJava,
+  "com.kohlschutter.junixsocket" % "junixsocket-core" % versions.junixsocket
 )
 
 Test / parallelExecution := false

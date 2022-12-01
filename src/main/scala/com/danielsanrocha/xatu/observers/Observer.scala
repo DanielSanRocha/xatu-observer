@@ -3,7 +3,7 @@ package com.danielsanrocha.xatu.observers
 import com.danielsanrocha.xatu.models.internals.Data
 import com.twitter.util.logging.Logger
 
-import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
+import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
 
 abstract class Observer[DATA <: Data](d: DATA) {
   private val logging: Logger = Logger(this.getClass)
@@ -27,6 +27,6 @@ abstract class Observer[DATA <: Data](d: DATA) {
   protected val task: Runnable
 
   private val ex = new ScheduledThreadPoolExecutor(1)
-  logging.info(s"Starting Observer for Data with id ${_data.id}, and name ${_data.name}")
-  protected val interval = ex.scheduleAtFixedRate(task, 10, 5, TimeUnit.SECONDS)
+  logging.info(s"Starting Observer for Data with id ${_data.id} and name ${_data.name}")
+  protected val interval: ScheduledFuture[_] = ex.scheduleAtFixedRate(task, 10, 5, TimeUnit.SECONDS)
 }

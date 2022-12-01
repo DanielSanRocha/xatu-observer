@@ -3,7 +3,7 @@ package com.danielsanrocha.xatu.observers
 import com.twitter.util.logging.Logger
 
 import java.nio.file.Paths
-import scala.collection.mutable.Map
+import scala.collection.mutable
 import java.io.{BufferedReader, File, FileReader}
 import java.util.concurrent._
 
@@ -13,54 +13,56 @@ import com.danielsanrocha.xatu.services.{LogService, ServiceService}
 class LogServiceObserver(s: Service, implicit val service: ServiceService, implicit val logService: LogService) extends Observer[Service](s) {
   private val logging: Logger = Logger(this.getClass)
 
-  private val files: Map[String, BufferedReader] = Map()
+  private val files: mutable.Map[String, BufferedReader] = mutable.Map()
 
-  protected val task: Runnable = new Runnable {
-    def run(): Unit = {
-      logging.debug(s"Searching for files Service(${_data.id}, ${_data.name})...")
+  override def status(): String = {
+    s"Service(${_data.id}, ${_data.name}). Files: ${files.keys}"
+  }
 
-      val regex = raw"${_data.logFileRegex}".r
-      val directoryPath = new File(_data.logFileDirectory)
-      try {
-        directoryPath.list() foreach { filename =>
-          if (regex matches filename) {
-            logging.debug(s"File $filename match regex! Observing it...")
+  override protected lazy val task: Runnable = () => {
+    logging.debug(s"Searching for files Service(${_data.id}, ${_data.name})...")
 
-            val b: BufferedReader = files.get(filename) match {
-              case Some(bufferedReader) =>
-                logging.debug(s"already listening to file ${filename}")
-                bufferedReader
+    val regex = raw"${_data.logFileRegex}".r
+    val directoryPath = new File(_data.logFileDirectory)
+    try {
+      directoryPath.list() foreach { filename =>
+        if (regex matches filename) {
+          logging.debug(s"File $filename match regex! Observing it...")
 
-              case None =>
-                logging.debug(s"creating buffered reader to file ${filename}")
+          val b: BufferedReader = files.get(filename) match {
+            case Some(bufferedReader) =>
+              logging.debug(s"already listening to file ${filename}")
+              bufferedReader
 
-                val fullpath = Paths.get(_data.logFileDirectory, filename)
-                val bufferedReader = new BufferedReader(new FileReader(fullpath.toFile))
-                files.addOne((filename, bufferedReader))
-                var line: String = ""
-                while (line != null) {
-                  line = bufferedReader.readLine()
-                }
-                bufferedReader
-            }
+            case None =>
+              logging.debug(s"creating buffered reader to file ${filename}")
 
-            var line: String = ""
-            while (line != null) {
-              line = b.readLine()
-              if (line != null) {
-                logging.debug(s"Indexing log of Service(${_data.id}, ${_data.name}). Log: ${line}")
-
-                logService.create(LogServiceModel(_data.id, _data.name, filename, line, System.currentTimeMillis()))
+              val fullpath = Paths.get(_data.logFileDirectory, filename)
+              val bufferedReader = new BufferedReader(new FileReader(fullpath.toFile))
+              files.addOne(filename -> bufferedReader)
+              var line: String = ""
+              while (line != null) {
+                line = bufferedReader.readLine()
               }
-            }
-          } else {
-            logging.debug(s"Filename $filename does not match the regex, skipping...")
+              bufferedReader
           }
+
+          var line: String = ""
+          while (line != null) {
+            line = b.readLine()
+            if (line != null) {
+              logging.debug(s"Indexing log of Service(${_data.id}, ${_data.name}). Log: ${line}")
+
+              logService.create(LogServiceModel(_data.id, _data.name, filename, line, System.currentTimeMillis()))
+            }
+          }
+        } else {
+          logging.debug(s"Filename $filename does not match the regex, skipping...")
         }
-      } catch {
-        case e: Exception =>
-          logging.warn(s"Error collecting logs. Message: ${e.getMessage}")
       }
+    } catch {
+      case e: Exception =>
+        logging.warn(s"Error collecting logs. Message: ${e.getMessage}")
     }
   }
 

@@ -9,7 +9,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api.Database
 import com.danielsanrocha.xatu.controllers._
-import com.danielsanrocha.xatu.filters.{AuthorizeFilter, ExceptionHandlerFilter, RequestIdFilter}
+import com.danielsanrocha.xatu.filters.{AuthorizeFilter, CORSFilter, ExceptionHandlerFilter, RequestIdFilter}
 import com.danielsanrocha.xatu.managers.{APIObserverManager, LogContainerObserverManager, LogServiceObserverManager, ServiceObserverManager}
 import com.danielsanrocha.xatu.repositories.{
   APIRepository,
@@ -81,11 +81,13 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private val apiController = new APIController()
   private val logController = new LogController()
   private val containerController = new ContainerController()
+  private val corsController = new CORSController()
 
   logging.info("Instantiaing filters...")
   private val exceptionHandlerFilter = new ExceptionHandlerFilter()
   private val requestIdFilter = new RequestIdFilter()
   private val authorizeFilter = new AuthorizeFilter(authorizationHeader, cache)
+  private val corsFilter = new CORSFilter()
 
   logging.info("Instantiating Observers Managers...")
   private implicit val apiObserverManager: APIObserverManager = new APIObserverManager()
@@ -97,6 +99,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
 
   override protected def configureHttp(router: HttpRouter): Unit = {
     router
+      .filter(corsFilter)
       .filter(requestIdFilter)
       .filter(exceptionHandlerFilter)
       .add(authorizeFilter, userController)
@@ -107,6 +110,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
       .add(authorizeFilter, statusController)
       .add(loginController)
       .add(healthcheckController)
+      .add(corsController)
       .add(notFoundController)
   }
 }
