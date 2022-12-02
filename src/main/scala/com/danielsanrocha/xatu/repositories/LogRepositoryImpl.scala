@@ -38,7 +38,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
           .put(indexMapping)
           .execute()
 
-        if (result.code != 201) {
+        if (result.code != 200) {
           throw new Exception(s"ES returned status ${result.code}!")
         }
 

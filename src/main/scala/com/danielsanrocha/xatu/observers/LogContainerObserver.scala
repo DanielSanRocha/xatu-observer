@@ -1,14 +1,11 @@
 package com.danielsanrocha.xatu.observers
 
 import com.twitter.util.logging.Logger
-import com.spotify.docker.client.DockerClient
+import com.github.dockerjava.api.DockerClient
 
-import java.util.concurrent._
 import com.danielsanrocha.xatu.models.internals.LogContainer
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.services.{ContainerService, LogService}
-
-import java.nio.charset.StandardCharsets
 
 class LogContainerObserver(
     c: ContainerResponse,
@@ -19,7 +16,11 @@ class LogContainerObserver(
 ) extends Observer[ContainerResponse](c) {
   private val logging: Logger = Logger(this.getClass)
 
-  protected var stream = dockerClient.logs(_data.info.head.containerId)
+  private val containerId = _data.info.head.containerId
+  private var stream = dockerClient
+    .logContainerCmd(containerId)
+    .withStdErr(true)
+    .withStdOut(true)
   while (stream.hasNext) stream.next()
 
   override protected lazy val task: Runnable = () => {

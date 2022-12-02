@@ -14,7 +14,7 @@ class ServiceObserver(s: Service, implicit val service: ServiceService) extends 
   override protected lazy val task: Runnable = () => {
     try {
       logging.debug(s"Checking service ${_data.name}...")
-      val command = scala.collection.JavaConverters.seqAsJavaList(Seq("/usr/bin/systemctl", "is-active", _data.name))
+      val command = scala.collection.JavaConverters.seqAsJavaList(Seq("systemctl", "is-active", _data.name))
       val process = new ProcessBuilder(command).redirectErrorStream(true).start()
       process.waitFor()
       val in = process.getInputStream

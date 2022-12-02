@@ -3,14 +3,14 @@ ThisBuild / version := "0.3.0"
 ThisBuild / scalaVersion := "2.13.10"
 
 lazy val root = (project in file("."))
-  .settings(
-    name := "xatu-observer"
-  )
+  .settings(name := "xatu-observer")
 
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.first
-  case "reference.conf"              => MergeStrategy.concat
-  case _                             => MergeStrategy.first
+  case x if x.contains("InjectionManagerFactory") => MergeStrategy.first
+  case x if x.contains("ServiceLocatorGenerator") => MergeStrategy.first
+  case PathList("META-INF", xs @ _*)              => MergeStrategy.discard
+  case "reference.conf"                           => MergeStrategy.concat
+  case _                                          => MergeStrategy.first
 }
 
 lazy val versions = new {
@@ -26,7 +26,7 @@ lazy val versions = new {
   val mysql = "8.0.31"
   val scalaj = "2.4.2"
   val uJson = "2.0.0"
-  val docker = "8.6.0"
+  val docker = "3.2.14"
   val javax = "2.1"
   val jersey = "2.37"
   val hk2 = "2.6.1"
@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
   "redis.clients" % "jedis" % versions.jedis,
   "org.scalaj" %% "scalaj-http" % versions.scalaj,
   "com.lihaoyi" %% "upickle" % versions.uJson,
-  "com.spotify" % "docker-client" % versions.docker,
+  "com.github.docker-java" % "docker-java" % versions.docker,
   "org.glassfish.jersey.core" % "jersey-common" % versions.jersey,
   "org.glassfish.jersey.core" % "jersey-client" % versions.jersey,
   "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,

@@ -39,7 +39,7 @@ abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Servic
           case None =>
             logging.info(s"Creating observer for DATA with id ${obj.id} and name ${obj.name}")
             val observer = createObserver(obj)
-            observers.addOne(obj.id -> observer)
+            if (observer != null) observers.addOne(obj.id -> observer)
         }
       }
 

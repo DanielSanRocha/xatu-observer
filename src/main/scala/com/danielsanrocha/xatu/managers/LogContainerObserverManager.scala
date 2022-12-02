@@ -1,10 +1,11 @@
 package com.danielsanrocha.xatu.managers
 
+import com.github.dockerjava.api.DockerClient
+import com.twitter.util.logging.Logger
+
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.observers.LogContainerObserver
 import com.danielsanrocha.xatu.services.{ContainerService, LogService}
-import com.spotify.docker.client.DockerClient
-import com.twitter.util.logging.Logger
 
 class LogContainerObserverManager(
     implicit val service: ContainerService,
@@ -15,6 +16,12 @@ class LogContainerObserverManager(
   private val logging: Logger = Logger(this.getClass)
   logging.info("Starting LogContainerObserverManager")
   override protected def createObserver(data: ContainerResponse): LogContainerObserver = {
-    new LogContainerObserver(data, service, logService, dockerClient, ec)
+    try {
+      new LogContainerObserver(data, service, logService, dockerClient, ec)
+    } catch {
+      case e: Exception =>
+        logging.error(s"Error creating LogContainerObserver. Message: ${e.getMessage}")
+        null
+    }
   }
 }
