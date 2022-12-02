@@ -3,7 +3,7 @@ package com.danielsanrocha.xatu.managers
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.observers.LogContainerObserver
 import com.danielsanrocha.xatu.services.{ContainerService, LogService}
-import com.github.dockerjava.api.DockerClient
+import com.spotify.docker.client.DockerClient
 import com.twitter.util.logging.Logger
 
 class LogContainerObserverManager(

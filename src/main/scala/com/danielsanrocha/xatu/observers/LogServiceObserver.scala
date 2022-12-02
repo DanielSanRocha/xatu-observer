@@ -6,8 +6,7 @@ import java.nio.file.Paths
 import scala.collection.mutable
 import java.io.{BufferedReader, File, FileReader}
 import java.util.concurrent._
-
-import com.danielsanrocha.xatu.models.internals.{Service, LogService => LogServiceModel}
+import com.danielsanrocha.xatu.models.internals.{Service, Status, LogService => LogServiceModel, LogServiceObserverStatus}
 import com.danielsanrocha.xatu.services.{LogService, ServiceService}
 
 class LogServiceObserver(s: Service, implicit val service: ServiceService, implicit val logService: LogService) extends Observer[Service](s) {
@@ -15,9 +14,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
 
   private val files: mutable.Map[String, BufferedReader] = mutable.Map()
 
-  override def status(): String = {
-    s"Service(${_data.id}, ${_data.name}). Files: ${files.keys}"
-  }
+  override def status(): Status = { LogServiceObserverStatus(_data.id, _data.name, files.keys.toSeq) }
 
   override protected lazy val task: Runnable = () => {
     logging.debug(s"Searching for files Service(${_data.id}, ${_data.name})...")
@@ -27,7 +24,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
     try {
       directoryPath.list() foreach { filename =>
         if (regex matches filename) {
-          logging.debug(s"File $filename match regex! Observing it...")
+          logging.debug(s"File $filename i::match regex! Observing it...")
 
           val b: BufferedReader = files.get(filename) match {
             case Some(bufferedReader) =>

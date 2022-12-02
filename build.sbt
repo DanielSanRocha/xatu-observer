@@ -8,8 +8,9 @@ lazy val root = (project in file("."))
   )
 
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", _*) => MergeStrategy.discard
-  case _                        => MergeStrategy.first
+  case PathList("META-INF", xs @ _*) => MergeStrategy.first
+  case "reference.conf"              => MergeStrategy.concat
+  case _                             => MergeStrategy.first
 }
 
 lazy val versions = new {
@@ -25,8 +26,11 @@ lazy val versions = new {
   val mysql = "8.0.31"
   val scalaj = "2.4.2"
   val uJson = "2.0.0"
-  val dockerJava = "3.0.14"
-  val junixsocket = "2.5.2"
+  val docker = "8.6.0"
+  val javax = "2.1"
+  val jersey = "2.37"
+  val hk2 = "2.6.1"
+  val guava = "2.26-b03"
 }
 
 lazy val versionsTest = new {
@@ -51,8 +55,12 @@ libraryDependencies ++= Seq(
   "redis.clients" % "jedis" % versions.jedis,
   "org.scalaj" %% "scalaj-http" % versions.scalaj,
   "com.lihaoyi" %% "upickle" % versions.uJson,
-  "com.github.docker-java" % "docker-java" % versions.dockerJava,
-  "com.kohlschutter.junixsocket" % "junixsocket-core" % versions.junixsocket
+  "com.spotify" % "docker-client" % versions.docker,
+  "org.glassfish.jersey.core" % "jersey-common" % versions.jersey,
+  "org.glassfish.jersey.core" % "jersey-client" % versions.jersey,
+  "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,
+  "org.glassfish.hk2" % "hk2-api" % versions.hk2,
+  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava
 )
 
 Test / parallelExecution := false

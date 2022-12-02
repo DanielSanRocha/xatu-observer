@@ -1,10 +1,10 @@
 package com.danielsanrocha.xatu
 
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.api.DockerClient
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.util.logging.Logger
+import com.spotify.docker.client.{DefaultDockerClient, DockerClient}
+
 import com.typesafe.config.{Config, ConfigFactory}
 import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api.Database
@@ -54,7 +54,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   implicit val cache: Jedis = new JedisPool(redisHost, redisPort).getResource
 
   logging.info("Instantiating docker client...")
-  private implicit val dockerClient: DockerClient = DockerClientBuilder.getInstance.build
+  private implicit val dockerClient: DockerClient = DefaultDockerClient.fromEnv.build
 
   logging.info("Creating repositories...")
   implicit val userRepository: UserRepository = new UserRepositoryImpl()
@@ -102,15 +102,15 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
       .filter(corsFilter)
       .filter(requestIdFilter)
       .filter(exceptionHandlerFilter)
+      .add(loginController)
       .add(authorizeFilter, userController)
       .add(authorizeFilter, serviceController)
       .add(authorizeFilter, apiController)
       .add(authorizeFilter, logController)
       .add(authorizeFilter, containerController)
       .add(authorizeFilter, statusController)
-      .add(loginController)
       .add(healthcheckController)
-      .add(corsController)
       .add(notFoundController)
+      .add(corsController)
   }
 }

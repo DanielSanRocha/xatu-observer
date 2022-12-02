@@ -3,19 +3,19 @@ package com.danielsanrocha.xatu.repositories
 import scala.concurrent.Future
 import scala.io.Source
 import scala.language.postfixOps
-import java.net.URLEncoder
+
 import scalaj.http.{Http, HttpOptions}
 import com.twitter.util.logging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.danielsanrocha.xatu.models.internals.{LogContainer, LogService}
+
+import com.danielsanrocha.xatu.models.internals.{Log, LogContainer, LogService}
 import com.danielsanrocha.xatu.exceptions.BadArgumentException
-import com.danielsanrocha.xatu.models.internals.Log.Log
 
 class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.ExecutionContext) extends LogRepository {
   private val logging: Logger = Logger(this.getClass)
-  val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build();
+  private val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build();
 
   logging.info("Loading configuration file and acessing it...")
   private implicit val conf: Config = ConfigFactory.load()
@@ -24,7 +24,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
   private val esPort = conf.getString(s"$config.port")
   private val esIndex = conf.getString(s"$config.index")
 
-  val indexMapping = Source.fromResource("logIndex.json").mkString
+  private val indexMapping = Source.fromResource("logIndex.json").mkString
 
   def createIndex(): Future[Unit] = {
     Future {
@@ -119,17 +119,15 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
 
         source("service_id") match {
           case service_id if service_id != null =>
-            Left(
-              LogService(
-                service_id.toString().toLong,
-                source("service_name").str,
-                source("filename").str,
-                source("message").str,
-                source("created_at").toString().toLong
-              )
+            LogService(
+              service_id.toString().toLong,
+              source("service_name").str,
+              source("filename").str,
+              source("message").str,
+              source("created_at").toString().toLong
             )
           case null =>
-            Right(LogContainer(source("container_id").toString.toLong, source("container_name").str, source("message").str, source("created_at").toString().toLong))
+            LogContainer(source("container_id").toString.toLong, source("container_name").str, source("message").str, source("created_at").toString().toLong)
         }
       } toSeq
     }

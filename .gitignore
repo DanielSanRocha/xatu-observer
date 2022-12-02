@@ -44,3 +44,7 @@ bin/
 
 # general
 *.class
+
+lib/
+module/
+META-INF

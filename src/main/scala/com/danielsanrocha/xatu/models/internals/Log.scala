@@ -1,5 +1,6 @@
 package com.danielsanrocha.xatu.models.internals
 
-object Log {
-  type Log = Either[LogService, LogContainer]
+trait Log {
+  val message: String
+  val createdAt: Long
 }

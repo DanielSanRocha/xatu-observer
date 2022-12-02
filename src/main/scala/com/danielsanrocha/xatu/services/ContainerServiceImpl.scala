@@ -6,9 +6,8 @@ import java.util.{List => JavaList}
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.language.postfixOps
-import com.github.dockerjava.api.DockerClient
+import com.spotify.docker.client.DockerClient
 
-import com.github.dockerjava.api.model.{Container => DockerContainer}
 import com.danielsanrocha.xatu.models.internals.{Container, ContainerInfo, NewContainer}
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.repositories.ContainerRepository
@@ -33,8 +32,8 @@ class ContainerServiceImpl(implicit repository: ContainerRepository, implicit va
 
   override def getAll(limit: Long, offset: Long): Future[Seq[ContainerResponse]] = {
     repository.getAll(limit, offset) map { containers =>
-      val containersActive: JavaList[DockerContainer] = dockerClient.listContainersCmd().exec()
-      val containersMap = (containersActive.asScala map { cont => cont.getNames.head -> cont }).groupMap(_._1)(_._2)
+      val containersActive = dockerClient.listContainers()
+      val containersMap = (containersActive.asScala map { cont => (cont.names().get(0), cont) }).groupMap(_._1)(_._2)
 
       logging.info(s"All docker running containers: ${containersMap.keySet}")
 
@@ -49,7 +48,7 @@ class ContainerServiceImpl(implicit repository: ContainerRepository, implicit va
         }
 
         val info = cont match {
-          case Some(c) => Some(ContainerInfo(c.head.getImage, c.head.getId))
+          case Some(c) => Some(ContainerInfo(c.head.image(), c.head.id()))
           case None    => None
         }
 

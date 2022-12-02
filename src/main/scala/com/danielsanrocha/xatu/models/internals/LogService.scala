@@ -8,4 +8,4 @@ case class LogService(
     filename: String,
     message: String,
     @JsonProperty("created_at") createdAt: Long
-)
+) extends Log

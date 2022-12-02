@@ -1,6 +1,6 @@
 package com.danielsanrocha.xatu.observers
 
-import com.danielsanrocha.xatu.models.internals.Data
+import com.danielsanrocha.xatu.models.internals.{Data, SimpleStatus, Status}
 import com.twitter.util.logging.Logger
 
 import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
@@ -16,8 +16,8 @@ abstract class Observer[DATA <: Data](d: DATA) {
     _data = data
   }
 
-  def status(): String = {
-    _data.toString
+  def status(): Status = {
+    SimpleStatus(_data.id, _data.name)
   }
 
   def stop(): Unit = {

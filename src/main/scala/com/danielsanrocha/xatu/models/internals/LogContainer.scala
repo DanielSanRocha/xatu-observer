@@ -7,4 +7,4 @@ case class LogContainer(
     @JsonProperty("container_name") containerName: String,
     message: String,
     @JsonProperty("created_at") createdAt: Long
-)
+) extends Log

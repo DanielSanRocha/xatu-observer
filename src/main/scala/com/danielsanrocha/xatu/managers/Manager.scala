@@ -1,11 +1,11 @@
 package com.danielsanrocha.xatu.managers
 
 import com.twitter.util.logging.Logger
-import scala.collection.mutable
 
+import scala.collection.mutable
 import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
 import com.danielsanrocha.xatu.services.Service
-import com.danielsanrocha.xatu.models.internals.Data
+import com.danielsanrocha.xatu.models.internals.{Data, Status}
 import com.danielsanrocha.xatu.observers.Observer
 
 abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Service[DATA], implicit val ec: scala.concurrent.ExecutionContext) {
@@ -17,12 +17,12 @@ abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Servic
 
   protected def createObserver(data: DATA): OBSERVER
 
-  def status(): Map[Long, String] = {
+  def status(): Seq[Status] = {
     val result = observers map { tuple =>
-      tuple._1 -> tuple._2.status()
+      tuple._2.status()
     }
     logging.debug(s"Returning status for ${observers.size} observers. Manager Status -> ${result}")
-    result.toMap
+    result.toSeq
   }
 
   protected val task: Runnable = () => {

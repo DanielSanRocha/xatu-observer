@@ -1,7 +1,6 @@
 package com.danielsanrocha.xatu.services
 
-import com.danielsanrocha.xatu.models.internals.Log.Log
-import com.danielsanrocha.xatu.models.internals.{LogContainer, LogService => LogServiceModel}
+import com.danielsanrocha.xatu.models.internals.{Log, LogContainer, LogService => LogServiceModel}
 
 import scala.concurrent.Future
 
