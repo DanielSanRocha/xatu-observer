@@ -1,14 +1,14 @@
 package com.danielsanrocha.xatu.services
 
-import java.sql.Timestamp
-import scala.concurrent.Future
-
-import org.mockito.Mockito.{mock, times, verify, when}
-import org.mockito.ArgumentMatchers.any
 import com.danielsanrocha.xatu.UnitSpec
 import com.danielsanrocha.xatu.models.internals.User
 import com.danielsanrocha.xatu.models.responses.UserResponse
 import com.danielsanrocha.xatu.repositories.UserRepository
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{mock, times, verify, when}
+
+import java.sql.Timestamp
+import scala.concurrent.Future
 
 class UserServiceSpec extends UnitSpec {
   describe("method getById") {

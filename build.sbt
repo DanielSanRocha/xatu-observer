@@ -31,6 +31,7 @@ lazy val versions = new {
   val jersey = "2.37"
   val hk2 = "2.6.1"
   val guava = "2.26-b03"
+  val junixsocket = "2.3.1"
 }
 
 lazy val versionsTest = new {
@@ -60,7 +61,9 @@ libraryDependencies ++= Seq(
   "org.glassfish.jersey.core" % "jersey-client" % versions.jersey,
   "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,
   "org.glassfish.hk2" % "hk2-api" % versions.hk2,
-  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava
+  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava,
+  "com.kohlschutter.junixsocket" % "junixsocket-common" % versions.junixsocket,
+  "com.kohlschutter.junixsocket" % "junixsocket-native-common" % versions.junixsocket
 )
 
 Test / parallelExecution := false
