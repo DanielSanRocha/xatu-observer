@@ -1,17 +1,16 @@
 package com.danielsanrocha.xatu.repositories
 
+import com.danielsanrocha.xatu.exceptions.BadArgumentException
+import com.danielsanrocha.xatu.models.internals.{Log, LogContainer, LogService}
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.twitter.util.logging.Logger
+import com.typesafe.config.{Config, ConfigFactory}
+import scalaj.http.{Http, HttpOptions}
+
 import scala.concurrent.Future
 import scala.io.Source
 import scala.language.postfixOps
-
-import scalaj.http.{Http, HttpOptions}
-import com.twitter.util.logging.Logger
-import com.typesafe.config.{Config, ConfigFactory}
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-
-import com.danielsanrocha.xatu.models.internals.{Log, LogContainer, LogService}
-import com.danielsanrocha.xatu.exceptions.BadArgumentException
 
 class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.ExecutionContext) extends LogRepository {
   private val logging: Logger = Logger(this.getClass)
@@ -130,6 +129,20 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
             LogContainer(source("container_id").toString.toLong, source("container_name").str, source("message").str, source("created_at").toString().toLong)
         }
       } toSeq
+    }
+  }
+
+  override def status(): Future[Unit] = {
+    val route = s"$esHost:$esPort/$esIndex"
+    logging.debug(s"Checking index on $route...")
+
+    Future {
+      val result = Http(route)
+        .option(HttpOptions.connTimeout(10000))
+        .option(HttpOptions.readTimeout(10000))
+        .execute()
+
+      if (result.code != 200) throw new Exception(s"Elasticsearch response wrong status code (${result.code}) expected 200.")
     }
   }
 }

@@ -9,4 +9,5 @@ trait LogRepository {
   def create(documentId: String, log: LogService): Future[Unit]
   def create(documentId: String, log: LogContainer): Future[Unit]
   def search(query: String): Future[Seq[Log]]
+  def status(): Future[Unit]
 }
