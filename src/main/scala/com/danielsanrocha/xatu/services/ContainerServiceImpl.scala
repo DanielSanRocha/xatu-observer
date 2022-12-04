@@ -1,16 +1,14 @@
 package com.danielsanrocha.xatu.services
 
-import com.twitter.util.logging.Logger
-
-import scala.concurrent.Future
-import scala.language.postfixOps
-import com.github.dockerjava.api.DockerClient
-import com.github.dockerjava.api.model.{Container => DockerContainer}
 import com.danielsanrocha.xatu.models.internals.{Container, ContainerInfo, NewContainer}
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.repositories.ContainerRepository
+import com.github.dockerjava.api.DockerClient
+import com.twitter.util.logging.Logger
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
+import scala.concurrent.Future
+import scala.language.postfixOps
 
 class ContainerServiceImpl(implicit repository: ContainerRepository, implicit val dockerClient: DockerClient, implicit val ec: scala.concurrent.ExecutionContext) extends ContainerService {
   private val logging: Logger = Logger(this.getClass)
