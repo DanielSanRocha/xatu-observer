@@ -74,6 +74,11 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private implicit val serviceObserverManager: ServiceObserverManager = new ServiceObserverManager()
   private implicit val logContainerManager: LogContainerObserverManager = new LogContainerObserverManager()
 
+  apiObserverManager.start()
+  logServiceManager.start()
+  serviceObserverManager.start()
+  logContainerManager.start()
+
   private val statusController = new StatusController()
 
   override protected def configureHttp(router: HttpRouter): Unit = {
