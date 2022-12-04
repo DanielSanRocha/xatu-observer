@@ -33,7 +33,7 @@ class LoginController(implicit val repository: UserRepository, implicit val cach
 
             val credentialJson = jsonMapper.writeValueAsString(timedCredential)
             val token = Security.hash(credentialJson)
-            val r1 = cache.set(s"token:${token}", credentialJson)
+            val r1 = cache.set(s"token:$token", credentialJson)
             val r2 = cache.expire(s"token:${token}", 4 * 60 * 60)
 
             logging.debug(s"(x-request-id - $requestId) Returning token")

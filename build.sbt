@@ -26,12 +26,11 @@ lazy val versions = new {
   val mysql = "8.0.31"
   val scalaj = "2.4.2"
   val uJson = "2.0.0"
-  val docker = "3.2.14"
+  val docker = "3.0.14"
   val javax = "2.1"
   val jersey = "2.37"
   val hk2 = "2.6.1"
   val guava = "2.26-b03"
-  val junixsocket = "2.3.1"
 }
 
 lazy val versionsTest = new {
@@ -61,9 +60,7 @@ libraryDependencies ++= Seq(
   "org.glassfish.jersey.core" % "jersey-client" % versions.jersey,
   "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,
   "org.glassfish.hk2" % "hk2-api" % versions.hk2,
-  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava,
-  "com.kohlschutter.junixsocket" % "junixsocket-common" % versions.junixsocket,
-  "com.kohlschutter.junixsocket" % "junixsocket-native-common" % versions.junixsocket
+  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava
 )
 
 Test / parallelExecution := false

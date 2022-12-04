@@ -115,18 +115,19 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
 
       body("hits")("hits").arr map { hit =>
         val source = hit("_source")
-
-        source("service_id") match {
-          case service_id if service_id != null =>
-            LogService(
-              service_id.toString().toLong,
-              source("service_name").str,
-              source("filename").str,
-              source("message").str,
-              source("created_at").toString().toLong
-            )
-          case null =>
+        try {
+          val service_id = source("service_id").toString
+          LogService(
+            service_id.toLong,
+            source("service_name").str,
+            source("filename").str,
+            source("message").str,
+            source("created_at").toString().toLong
+          )
+        } catch {
+          case _: NoSuchElementException =>
             LogContainer(source("container_id").toString.toLong, source("container_name").str, source("message").str, source("created_at").toString().toLong)
+          case e: Exception => throw e
         }
       } toSeq
     }
