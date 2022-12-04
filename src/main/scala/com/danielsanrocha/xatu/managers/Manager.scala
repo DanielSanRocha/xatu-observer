@@ -1,17 +1,17 @@
 package com.danielsanrocha.xatu.managers
 
-import com.twitter.util.logging.Logger
-
-import scala.collection.mutable
-import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
-import com.danielsanrocha.xatu.services.Service
 import com.danielsanrocha.xatu.models.internals.{Data, Status}
 import com.danielsanrocha.xatu.observers.Observer
+import com.danielsanrocha.xatu.services.Service
+import com.twitter.util.logging.Logger
+
+import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
+import scala.collection.mutable
 
 abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Service[DATA], implicit val ec: scala.concurrent.ExecutionContext) {
   private lazy val logging: Logger = Logger(this.getClass)
 
-  protected lazy val observers: mutable.Map[Long, OBSERVER] = mutable.Map()
+  lazy val observers: mutable.Map[Long, OBSERVER] = mutable.Map()
 
   private val ex = new ScheduledThreadPoolExecutor(1)
 
@@ -25,7 +25,7 @@ abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Servic
     result.toSeq
   }
 
-  protected val task: Runnable = () => {
+  val task: Runnable = () => {
     service.getAll(1000, 0) map { objects =>
       objects.foreach { obj =>
         observers.get(obj.id) match {
@@ -39,7 +39,10 @@ abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Servic
           case None =>
             logging.info(s"Creating observer for DATA with id ${obj.id} and name ${obj.name}")
             val observer = createObserver(obj)
-            if (observer != null) observers.addOne(obj.id -> observer)
+            if (observer != null) {
+              observers.addOne(obj.id -> observer)
+              observer.start()
+            }
         }
       }
 
@@ -62,5 +65,9 @@ abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Servic
     }
   }
 
-  protected val interval: ScheduledFuture[_] = ex.scheduleAtFixedRate(task, 10, 10, TimeUnit.SECONDS)
+  var interval: ScheduledFuture[_] = null
+
+  def start(): Unit = {
+    interval = ex.scheduleAtFixedRate(task, 10, 10, TimeUnit.SECONDS)
+  }
 }

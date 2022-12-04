@@ -1,13 +1,12 @@
 package com.danielsanrocha.xatu.observers
 
+import com.danielsanrocha.xatu.models.internals.{LogServiceObserverStatus, Service, Status, LogService => LogServiceModel}
+import com.danielsanrocha.xatu.services.{LogService, ServiceService}
 import com.twitter.util.logging.Logger
 
+import java.io.{BufferedReader, File, FileReader}
 import java.nio.file.Paths
 import scala.collection.mutable
-import java.io.{BufferedReader, File, FileReader}
-import java.util.concurrent._
-import com.danielsanrocha.xatu.models.internals.{Service, Status, LogService => LogServiceModel, LogServiceObserverStatus}
-import com.danielsanrocha.xatu.services.{LogService, ServiceService}
 
 class LogServiceObserver(s: Service, implicit val service: ServiceService, implicit val logService: LogService) extends Observer[Service](s) {
   private val logging: Logger = Logger(this.getClass)
@@ -16,7 +15,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
 
   override def status(): Status = { LogServiceObserverStatus(_data.id, _data.name, files.keys.toSeq) }
 
-  override protected lazy val task: Runnable = () => {
+  override lazy val task: Runnable = () => {
     logging.debug(s"Searching for files Service(${_data.id}, ${_data.name})...")
 
     val regex = raw"${_data.logFileRegex}".r

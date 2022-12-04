@@ -1,15 +1,14 @@
 package com.danielsanrocha.xatu.observers
 
-import com.twitter.util.logging.Logger
-import scalaj.http.{Http, HttpOptions}
-
 import com.danielsanrocha.xatu.models.internals.API
 import com.danielsanrocha.xatu.services.APIService
+import com.twitter.util.logging.Logger
+import scalaj.http.{Http, HttpOptions}
 
 class APIObserver(api: API, implicit val service: APIService) extends Observer[API](api) {
   private val logging: Logger = Logger(this.getClass)
 
-  override protected lazy val task: Runnable = () => {
+  override lazy val task: Runnable = () => {
     val route = s"${_data.host}:${_data.port}${_data.healthcheckRoute}"
     logging.info(s"Making request to API(id, name) = (${api.id}, ${api.name}) route $route")
     try {

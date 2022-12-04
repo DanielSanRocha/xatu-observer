@@ -20,7 +20,7 @@ class LogContainerObserver(
     .withStdErr(true)
     .withStdOut(true)
 
-  override protected lazy val task: Runnable = () => {
+  override lazy val task: Runnable = () => {
 //    while (stream.hasNext) {
 //      val line = stream.next()
 //      val log = LogContainer(_data.id, _data.name, line.toString, System.currentTimeMillis())

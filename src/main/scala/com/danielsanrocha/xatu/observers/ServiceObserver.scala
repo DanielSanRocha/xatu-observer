@@ -1,17 +1,15 @@
 package com.danielsanrocha.xatu.observers
 
-import java.util.concurrent._
-import java.io.{BufferedReader, InputStreamReader}
-import com.twitter.util.logging.Logger
-import scalaj.http.{Http, HttpOptions}
-
 import com.danielsanrocha.xatu.models.internals.Service
 import com.danielsanrocha.xatu.services.ServiceService
+import com.twitter.util.logging.Logger
+
+import java.io.{BufferedReader, InputStreamReader}
 
 class ServiceObserver(s: Service, implicit val service: ServiceService) extends Observer[Service](s) {
   private val logging: Logger = Logger(this.getClass)
 
-  override protected lazy val task: Runnable = () => {
+  override lazy val task: Runnable = () => {
     try {
       logging.debug(s"Checking service ${_data.name}...")
       val command = scala.collection.JavaConverters.seqAsJavaList(Seq("systemctl", "is-active", _data.name))

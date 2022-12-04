@@ -11,4 +11,4 @@ case class Service(
     status: Char,
     createDate: Timestamp,
     updateDate: Timestamp
-) extends Data
+) extends Data(id, name)

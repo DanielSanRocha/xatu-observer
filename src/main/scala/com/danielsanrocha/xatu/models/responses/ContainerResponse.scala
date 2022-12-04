@@ -1,7 +1,8 @@
 package com.danielsanrocha.xatu.models.responses
 
-import java.sql.Timestamp
 import com.danielsanrocha.xatu.models.internals.{Container, ContainerInfo, Data}
+
+import java.sql.Timestamp
 
 case class ContainerResponse(
     override val id: Long,
@@ -10,6 +11,6 @@ case class ContainerResponse(
     status: Char,
     createDate: Timestamp,
     updateDate: Timestamp
-) extends Data {
+) extends Data(id, name) {
   def container: Container = Container(id, name, createDate, updateDate)
 }

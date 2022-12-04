@@ -1,6 +1,5 @@
 package com.danielsanrocha.xatu.models.internals
 
-abstract class Data {
-  val id: Long
-  val name: String
+class Data(val id: Long, val name: String) {
+  def apply(id: Long, name: String) = new Data(id, name)
 }

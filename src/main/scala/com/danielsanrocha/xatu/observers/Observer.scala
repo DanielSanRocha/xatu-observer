@@ -24,9 +24,14 @@ abstract class Observer[DATA <: Data](d: DATA) {
     interval.cancel(true)
   }
 
-  protected val task: Runnable
+  val task: Runnable
 
   private val ex = new ScheduledThreadPoolExecutor(1)
-  logging.info(s"Starting Observer for Data with id ${_data.id} and name ${_data.name}")
-  protected val interval: ScheduledFuture[_] = ex.scheduleAtFixedRate(task, 10, 5, TimeUnit.SECONDS)
+
+  var interval: ScheduledFuture[_] = null
+
+  def start(): Unit = {
+    logging.info(s"Starting Observer for Data with id ${_data.id} and name ${_data.name}")
+    interval = ex.scheduleAtFixedRate(task, 10, 5, TimeUnit.SECONDS)
+  }
 }
