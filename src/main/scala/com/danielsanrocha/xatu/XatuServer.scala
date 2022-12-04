@@ -79,6 +79,14 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   serviceObserverManager.start()
   logContainerManager.start()
 
+  private val token = conf.getString("telegram.bot_token")
+  if (token != "inactive") {
+    logging.info("Starting TelegramNotifier...")
+    val chatId = conf.getString("telegram.chat_id")
+    val telegramNotifier = new TelegramNotifier(token = token, chatId = chatId, containerService, apiService, serviceService, ec)
+    telegramNotifier.start()
+  }
+
   private val statusController = new StatusController()
 
   override protected def configureHttp(router: HttpRouter): Unit = {
