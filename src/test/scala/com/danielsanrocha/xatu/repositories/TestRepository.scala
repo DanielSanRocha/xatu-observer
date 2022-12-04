@@ -1,13 +1,12 @@
 package com.danielsanrocha.xatu.repositories
 
-import com.danielsanrocha.xatu.UnitSpec
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.io.Source
 
-class RepositorySpec extends UnitSpec {
+trait TestRepository {
   protected implicit val client = Database.forConfig("test.h2mem")
 
   def runQuery(query: String): Unit = {

@@ -25,7 +25,7 @@ class HealthcheckController(
 
   get("/healthcheck") { request: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
-    logging.info(s"(x-request-id - $requestId) Healthcheck called, checking redis and mysql...")
+    logging.info(s"(x-request-id - $requestId) Healthcheck called, checking redis, docker, elasticsearch and mysql...")
 
     val random = UUID.random.toString
 
@@ -38,7 +38,6 @@ class HealthcheckController(
     } recover { case e: Exception => Some(e) }
 
     val mysqlFuture = client.run(sql"show tables".as[String]) map { _ =>
-      logging.info(s"(x-request-id - $requestId) Returning ok...")
       None
     } recover { case e: Exception => Some(e) }
 
@@ -47,8 +46,7 @@ class HealthcheckController(
       None
     } recover { case e: Exception => Some(e) }
 
-    val elasticsearchFuture = Future[Option[Exception]] {
-      logRepository.status()
+    val elasticsearchFuture = logRepository.status() map { _ =>
       None
     } recover { case e: Exception => Some(e) }
 
@@ -67,7 +65,6 @@ class HealthcheckController(
         case Some(e) => flag = true; e.getMessage
         case None    => "Ok"
       }
-
       val elasticsearch = result(3) match {
         case Some(e) => flag = true; e.getMessage
         case None    => "Ok"

@@ -1,8 +1,9 @@
 package com.danielsanrocha.xatu.repositories
 
+import com.danielsanrocha.xatu.UnitSpec
 import com.danielsanrocha.xatu.commons.Security
 
-class UserRepositorySpec extends RepositorySpec {
+class UserRepositorySpec extends UnitSpec with TestRepository {
   runQuery(s"INSERT INTO tb_users (id, name, email, password) VALUES (7, 'Jujuba', 'jujuba@mail.com', '${Security.hash("1234")}');")
 
   describe("method getByEmail") {

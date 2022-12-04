@@ -1,40 +1,18 @@
 package com.danielsanrocha.xatu
 
-import com.twitter.finatra.http.HttpServer
-import com.twitter.finatra.http.routing.HttpRouter
-import com.twitter.util.logging.Logger
-import com.github.dockerjava.core.DockerClientBuilder
-import com.github.dockerjava.api.DockerClient
-
-import com.typesafe.config.{Config, ConfigFactory}
-import redis.clients.jedis.{Jedis, JedisPool}
-import slick.jdbc.MySQLProfile.api.Database
 import com.danielsanrocha.xatu.controllers._
 import com.danielsanrocha.xatu.filters.{AuthorizeFilter, CORSFilter, ExceptionHandlerFilter, RequestIdFilter}
 import com.danielsanrocha.xatu.managers.{APIObserverManager, LogContainerObserverManager, LogServiceObserverManager, ServiceObserverManager}
-import com.danielsanrocha.xatu.repositories.{
-  APIRepository,
-  APIRepositoryImpl,
-  ContainerRepository,
-  ContainerRepositoryImpl,
-  LogRepository,
-  ServiceRepository,
-  ServiceRepositoryImpl,
-  UserRepository,
-  UserRepositoryImpl
-}
-import com.danielsanrocha.xatu.services.{
-  APIService,
-  APIServiceImpl,
-  ContainerService,
-  ContainerServiceImpl,
-  LogService,
-  LogServiceImpl,
-  ServiceService,
-  ServiceServiceImpl,
-  UserService,
-  UserServiceImpl
-}
+import com.danielsanrocha.xatu.repositories._
+import com.danielsanrocha.xatu.services._
+import com.github.dockerjava.api.DockerClient
+import com.github.dockerjava.core.DockerClientBuilder
+import com.twitter.finatra.http.HttpServer
+import com.twitter.finatra.http.routing.HttpRouter
+import com.twitter.util.logging.Logger
+import com.typesafe.config.{Config, ConfigFactory}
+import redis.clients.jedis.{Jedis, JedisPool}
+import slick.jdbc.MySQLProfile.api.Database
 
 class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository) extends HttpServer {
   private val logging: Logger = Logger(this.getClass)
@@ -42,8 +20,8 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   logging.info("Loading configuration file and acessing it...")
   private implicit val conf: Config = ConfigFactory.load()
 
-  val port = conf.getInt("api.port")
-  val appName = conf.getString("api.name")
+  private val port = conf.getInt("api.port")
+  private val appName = conf.getString("api.name")
 
   override protected def defaultHttpPort: String = s":${port}"
 
