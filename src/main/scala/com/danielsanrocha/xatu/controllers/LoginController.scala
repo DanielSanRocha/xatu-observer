@@ -5,14 +5,15 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.finagle.context.Contexts
 import com.twitter.finatra.http.Controller
-import redis.clients.jedis.{Jedis, JedisPool}
+import redis.clients.jedis.JedisPool
 import com.danielsanrocha.xatu.commons.Security
 import com.danielsanrocha.xatu.models.internals.{RequestId, TimedCredential}
 import com.danielsanrocha.xatu.models.responses.{ServerMessage, Token}
 import com.danielsanrocha.xatu.models.requests.Credential
-import com.danielsanrocha.xatu.repositories.UserRepository
+import com.danielsanrocha.xatu.services.UserService
+import com.twitter.finagle.http.Request
 
-class LoginController(implicit val repository: UserRepository, implicit val cachePool: JedisPool, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
+class LoginController(implicit val service: UserService, implicit val cachePool: JedisPool, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)
   private val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build()
 
@@ -20,7 +21,7 @@ class LoginController(implicit val repository: UserRepository, implicit val cach
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Login route called, searching for user...")
 
-    repository.getByEmail(credential.email) map {
+    service.getByEmail(credential.email) map {
       case Some(user) =>
         logging.debug(s"(x-request-id - $requestId) User with email ${credential.email} found, validating credential...")
         Security.hash(credential.password) match {

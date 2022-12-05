@@ -37,6 +37,7 @@ class APIServiceImpl(implicit repository: APIRepository, implicit val ec: scala.
   }
 
   override def getAll(limit: Long, offset: Long): Future[Seq[API]] = {
+    logging.debug(s"Getting all APIS with limit $limit and offset $offset")
     repository.getAll(limit, offset)
   }
 

@@ -139,8 +139,8 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
 
     Future {
       val result = Http(route)
-        .option(HttpOptions.connTimeout(10000))
-        .option(HttpOptions.readTimeout(10000))
+        .option(HttpOptions.connTimeout(3000))
+        .option(HttpOptions.readTimeout(3000))
         .execute()
 
       if (result.code != 200) throw new Exception(s"Elasticsearch response wrong status code (${result.code}) expected 200.")

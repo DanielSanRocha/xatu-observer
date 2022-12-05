@@ -71,7 +71,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
   }
 
   override def stop(): Unit = {
-    interval.cancel(true)
+    super.stop()
     files.foreach { case (filename, b) =>
       b.close()
       files.remove(filename)

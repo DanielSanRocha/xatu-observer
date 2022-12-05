@@ -1,4 +1,4 @@
-ThisBuild / version := "0.4.0"
+ThisBuild / version := "1.0.0"
 
 ThisBuild / scalaVersion := "2.13.10"
 
@@ -18,7 +18,6 @@ lazy val versions = new {
   val finagle = "21.2.0"
   val twitter = "21.2.0"
   val typesafeConfig = "1.3.1"
-  val logback = "1.1.7"
   val activation = "1.2.0"
   val scalaUUID = "0.3.1"
   val jedis = "4.3.0"
@@ -49,7 +48,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % versions.slick,
   "mysql" % "mysql-connector-java" % versions.mysql,
   "com.typesafe" % "config" % versions.typesafeConfig,
-  "ch.qos.logback" % "logback-classic" % versions.logback,
   "com.sun.activation" % "javax.activation" % versions.activation,
   "io.jvm.uuid" %% "scala-uuid" % versions.scalaUUID,
   "redis.clients" % "jedis" % versions.jedis,
@@ -60,7 +58,12 @@ libraryDependencies ++= Seq(
   "org.glassfish.jersey.core" % "jersey-client" % versions.jersey,
   "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,
   "org.glassfish.hk2" % "hk2-api" % versions.hk2,
-  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava
+  "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava,
+  "com.twitter" %% "twitter-server-slf4j-log4j12" % versions.twitter
+)
+
+excludeDependencies ++= Seq(
+  ExclusionRule("org.slf4j", "log4j-over-slf4j")
 )
 
 Test / parallelExecution := false

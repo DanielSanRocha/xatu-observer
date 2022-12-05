@@ -7,11 +7,13 @@ import scala.io.Source
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
 import com.danielsanrocha.xatu.commons.Security
 import com.danielsanrocha.xatu.repositories.{LogRepository, LogRepositoryImpl}
+import org.apache.log4j.BasicConfigurator
 
 object Main extends App {
+  BasicConfigurator.configure()
+
   private val usage = """
   Usage
 
@@ -36,11 +38,11 @@ object Main extends App {
     implicit val logRepository: LogRepository = new LogRepositoryImpl("elasticsearch", ec)
 
     args(0) match {
-      case "start" => {
+      case "start" =>
         val server = new XatuServer()
         server.main(args)
-      }
-      case "createTables" => {
+
+      case "createTables" =>
         val userQuery = Source.fromResource("queries/CreateUsersTable.sql").mkString
         Await.result(client.run(sqlu"#$userQuery"), Duration.Inf)
 
@@ -52,16 +54,16 @@ object Main extends App {
 
         val containerQuery = Source.fromResource("queries/CreateContainersTable.sql").mkString
         Await.result(client.run(sqlu"#$containerQuery"), Duration.Inf)
-      }
-      case "createIndex" => {
+
+      case "createIndex" =>
         Await.result(logRepository.createIndex(), atMost = 10 second)
-      }
-      case "hash" => {
+
+      case "hash" =>
         args.length match {
           case 2 => println(s"Hash: ${Security.hash(args(1))}")
           case _ => println("Missing parameters or too much parameters to function hash. Ex: java -jar main.jar hash <password>")
         }
-      }
+
       case _ => println(usage)
     }
   }

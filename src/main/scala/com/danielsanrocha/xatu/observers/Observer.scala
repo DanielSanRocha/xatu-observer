@@ -21,17 +21,20 @@ abstract class Observer[DATA <: Data](d: DATA) {
   }
 
   def stop(): Unit = {
-    interval.cancel(true)
+    interval match {
+      case Some(inter) => inter.cancel(true)
+      case None        => logging.warn(s"Trying to stop a already stopped observer")
+    }
   }
 
   val task: Runnable
 
   private val ex = new ScheduledThreadPoolExecutor(1)
 
-  var interval: ScheduledFuture[_] = null
+  var interval: Option[ScheduledFuture[_]] = None
 
   def start(): Unit = {
     logging.info(s"Starting Observer for Data with id ${_data.id} and name ${_data.name}")
-    interval = ex.scheduleAtFixedRate(task, 10, 5, TimeUnit.SECONDS)
+    interval = Some(ex.scheduleAtFixedRate(task, 10, 10, TimeUnit.SECONDS))
   }
 }

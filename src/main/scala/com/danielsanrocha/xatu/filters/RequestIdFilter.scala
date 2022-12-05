@@ -6,7 +6,6 @@ import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.Future
 import com.twitter.finagle.context.Contexts
-import javax.inject.{Inject, Singleton}
 
 import com.danielsanrocha.xatu.models.internals.{RequestId}
 

@@ -5,11 +5,13 @@ import scala.concurrent.Future
 import java.sql.Timestamp
 import com.danielsanrocha.xatu.models.internals.User
 import slick.jdbc.MySQLProfile.api._
-
 import com.danielsanrocha.xatu.models.internals.User
-import com.danielsanrocha.xatu.commons.FutureConverters.{RichScalaFuture}
+import com.danielsanrocha.xatu.commons.FutureConverters.RichScalaFuture
+import com.twitter.util.logging.Logger
 
 class UserRepositoryImpl(implicit client: Database, implicit val ec: scala.concurrent.ExecutionContext) extends UserRepository {
+  private val logging: Logger = Logger(this.getClass)
+
   class UserTable(tag: Tag) extends Table[User](tag, "tb_users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
@@ -28,6 +30,14 @@ class UserRepositoryImpl(implicit client: Database, implicit val ec: scala.concu
   }
 
   override def getByEmail(email: String): Future[Option[User]] = {
-    client.run(users.take(1).filter(_.email === email).result.headOption)
+    logging.debug(s"Searching for user with email $email")
+    client.run(users.filter(_.email === email).result.headOption) map {
+      case Some(user) =>
+        logging.info("Found user by emai;!")
+        Some(user)
+      case None =>
+        logging.debug("User not found by email!")
+        None
+    }
   }
 }
