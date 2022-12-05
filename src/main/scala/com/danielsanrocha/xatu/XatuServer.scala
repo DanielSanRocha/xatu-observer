@@ -11,7 +11,7 @@ import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.util.logging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
-import redis.clients.jedis.{Jedis, JedisPool}
+import redis.clients.jedis.{JedisPool, JedisPoolConfig}
 import slick.jdbc.MySQLProfile.api.Database
 
 class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository) extends HttpServer {
@@ -30,7 +30,10 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   logging.info("Connecting to redis...")
   private val redisHost = conf.getString("redis.host")
   private val redisPort = conf.getInt("redis.port")
-  implicit val cache: Jedis = new JedisPool(redisHost, redisPort).getResource
+
+  private val jedisPoolConfig = new JedisPoolConfig()
+  jedisPoolConfig.setMaxTotal(1000)
+  implicit val cache: JedisPool = new JedisPool(jedisPoolConfig, redisHost, redisPort, 10000)
 
   logging.info("Instantiating docker client...")
   implicit val dockerClient: DockerClient = DockerClientBuilder.getInstance.build

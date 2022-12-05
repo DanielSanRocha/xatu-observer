@@ -9,13 +9,13 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.util.logging.Logger
 import io.jvm.uuid.UUID
-import redis.clients.jedis.Jedis
+import redis.clients.jedis.{Jedis, JedisPool}
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Future
 
 class HealthcheckController(
-    implicit val cache: Jedis,
+    implicit val cachePool: JedisPool,
     implicit val client: Database,
     implicit val dockerClient: DockerClient,
     implicit val logRepository: LogRepository,
@@ -29,13 +29,18 @@ class HealthcheckController(
 
     val random = UUID.random.toString
 
+    val cache = cachePool.getResource
     val redisFuture = Future[Option[Exception]] {
       cache.set("random", random)
       val random2 = cache.get("random")
 
+      cachePool.returnResource(cache)
       if (random != random2) Some(new Exception("Problems with redis..."))
       else None
-    } recover { case e: Exception => Some(e) }
+    } recover { case e: Exception =>
+      cachePool.returnResource(cache)
+      Some(e)
+    }
 
     val mysqlFuture = client.run(sql"show tables".as[String]) map { _ =>
       None

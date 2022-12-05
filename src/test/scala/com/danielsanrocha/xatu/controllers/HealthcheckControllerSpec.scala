@@ -7,10 +7,10 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.command.PingCmd
 import com.twitter.finagle.http.Status
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, anyString}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import redis.clients.jedis.Jedis
+import redis.clients.jedis.{Jedis, JedisPool}
 import redis.clients.jedis.exceptions.JedisException
 
 import scala.concurrent.Future
@@ -20,11 +20,13 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
   describe("GET /healthcheck") {
     it("should return ok if all repositories are ok") {
-      implicit val cache: Jedis = mock[Jedis]
+      val cache: Jedis = mock[Jedis]
+      implicit val cachePool: JedisPool = mock[JedisPool]
       implicit val dockerClient: DockerClient = mock[DockerClient]
       implicit val logRepository: LogRepository = mock[LogRepository]
 
       val randomCapture: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      when(cachePool.getResource).thenReturn(cache)
       when(cache.set(anyString(), randomCapture.capture)).thenReturn("OK")
       when(cache.get("random")).thenAnswer(_ => randomCapture.getValue)
 
@@ -38,6 +40,8 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
       Future {
         val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.Ok)
+        verify(cachePool, times(1)).returnResource(cache)
+        verify(cachePool, times(1)).returnResource(any)
         response.redis should equal("Ok")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
@@ -46,12 +50,14 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
     }
 
     it("should return 500 if redis is misbehaving") {
-      implicit val cache: Jedis = mock[Jedis]
+      val cache: Jedis = mock[Jedis]
+      implicit val cachePool: JedisPool = mock[JedisPool]
       implicit val dockerClient: DockerClient = mock[DockerClient]
       implicit val logRepository: LogRepository = mock[LogRepository]
 
       when(cache.set(anyString(), anyString())).thenReturn("OK")
       when(cache.get("random")).thenAnswer(_ => "1234")
+      when(cachePool.getResource).thenReturn(cache)
 
       when(logRepository.status()).thenReturn(Future())
 
@@ -63,6 +69,8 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
       Future {
         val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        verify(cachePool, times(1)).returnResource(any)
+        verify(cachePool, times(1)).returnResource(cache)
         response.redis should not equal ("Ok")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
@@ -71,12 +79,14 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
     }
 
     it("should return 500 if redis throws an exception") {
+      implicit val cachePool: JedisPool = mock[JedisPool]
       implicit val cache: Jedis = mock[Jedis]
       implicit val dockerClient: DockerClient = mock[DockerClient]
       implicit val logRepository: LogRepository = mock[LogRepository]
 
       when(cache.set(anyString(), anyString())).thenReturn("OK")
       when(cache.get("random")).thenThrow(new JedisException("Not working..."))
+      when(cachePool.getResource).thenReturn(cache)
 
       when(logRepository.status()).thenReturn(Future())
 
@@ -88,6 +98,8 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
       Future {
         val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        verify(cachePool, times(1)).returnResource(any)
+        verify(cachePool, times(1)).returnResource(cache)
         response.redis should equal("Not working...")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
@@ -97,10 +109,12 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
     it("should return 500 if LogRepository throws an exception") {
       implicit val cache: Jedis = mock[Jedis]
+      implicit val cachePool: JedisPool = mock[JedisPool]
       implicit val dockerClient: DockerClient = mock[DockerClient]
       implicit val logRepository: LogRepository = mock[LogRepository]
 
       val randomCapture: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      when(cachePool.getResource).thenReturn(cache)
       when(cache.set(anyString(), randomCapture.capture)).thenReturn("OK")
       when(cache.get("random")).thenAnswer(_ => randomCapture.getValue)
 
@@ -116,6 +130,8 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
       Future {
         val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        verify(cachePool, times(1)).returnResource(any)
+        verify(cachePool, times(1)).returnResource(cache)
         response.redis should equal("Ok")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
@@ -125,10 +141,12 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
     it("should return 500 if DockerClient throws an exception") {
       implicit val cache: Jedis = mock[Jedis]
+      implicit val cachePool: JedisPool = mock[JedisPool]
       implicit val dockerClient: DockerClient = mock[DockerClient]
       implicit val logRepository: LogRepository = mock[LogRepository]
 
       val randomCapture: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      when(cachePool.getResource).thenReturn(cache)
       when(cache.set(anyString(), randomCapture.capture)).thenReturn("OK")
       when(cache.get("random")).thenAnswer(_ => randomCapture.getValue)
 
@@ -143,6 +161,8 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
 
       Future {
         val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        verify(cachePool, times(1)).returnResource(any)
+        verify(cachePool, times(1)).returnResource(cache)
         response.redis should equal("Ok")
         response.mysql should equal("Ok")
         response.docker should equal("aleluia")

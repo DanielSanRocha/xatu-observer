@@ -9,13 +9,13 @@ import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finatra.http.exceptions.ExceptionManager
 import com.twitter.util.Future
 import javax.inject.{Inject, Singleton}
-import redis.clients.jedis.{JedisPool, Jedis}
+import redis.clients.jedis.JedisPool
 
 import com.danielsanrocha.xatu.models.internals.{RequestId, TimedCredential}
 import com.danielsanrocha.xatu.models.responses.{ServerMessage}
 
 @Singleton
-class AuthorizeFilter(authorizationHeader: String, implicit val cache: Jedis) extends SimpleFilter[Request, Response] {
+class AuthorizeFilter(authorizationHeader: String, implicit val cachePool: JedisPool) extends SimpleFilter[Request, Response] {
   val logging: Logger = Logger(this.getClass)
   val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build();
 
@@ -33,23 +33,25 @@ class AuthorizeFilter(authorizationHeader: String, implicit val cache: Jedis) ex
 
         Future(forbiddenResponse)
       }
-      case Some(header) => {
+      case Some(header) =>
+        val cache = cachePool.getResource
         cache.get(s"token:$header") match {
-          case null => {
+          case null =>
+            cachePool.returnResource(cache)
             logging.warn(s"(x-request-id - ${requestId}) User sent header Authorization: ${header} which do not exist on the cache server!")
             val errorResponse = Response()
             errorResponse.statusCode = 403
             errorResponse.setContentTypeJson()
             errorResponse.setContentString(jsonMapper.writeValueAsString(ServerMessage(s"Token ${header} was not found in the cache server! Try to login again", requestId)))
             Future(errorResponse)
-          }
-          case credentialJson => {
+
+          case credentialJson =>
+            cachePool.returnResource(cache)
             logging.debug(s"(x-request-id - $requestId) Token found on cache server, decoding...")
             val credential = jsonMapper.readValue(credentialJson, classOf[TimedCredential])
             Contexts.local.let(TimedCredential, credential) { service(request) }
-          }
+
         }
-      }
     }
   }
 }
