@@ -4,12 +4,15 @@ import com.twitter.util.logging.Logger
 import slick.jdbc.MySQLProfile.api._
 
 import scala.io.Source
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import com.danielsanrocha.xatu.commons.Security
 import com.danielsanrocha.xatu.repositories.{LogRepository, LogRepositoryImpl}
 import org.apache.log4j.BasicConfigurator
+
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends App {
   BasicConfigurator.configure()
@@ -29,7 +32,8 @@ object Main extends App {
     println(usage)
   } else {
     logging.info("Loading execution context...")
-    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+    val executorService = Executors.newFixedThreadPool(8)
+    val ec: ExecutionContext = ExecutionContext.fromExecutor(executorService)
 
     logging.info("Loading slick MySQLClient...")
     implicit val client: Database = Database.forConfig("mysql")
