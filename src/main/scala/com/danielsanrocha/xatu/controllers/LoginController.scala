@@ -34,7 +34,7 @@ class LoginController(implicit val service: UserService, implicit val cachePool:
             val cache = cachePool.getResource
             val r1 = cache.set(s"token:$token", credentialJson)
             val r2 = cache.expire(s"token:${token}", 4 * 60 * 60)
-            cachePool.returnResource(cache)
+            cache.close()
 
             logging.debug(s"(x-request-id - $requestId) Returning token")
             response.ok(Token(s"Cache server returned: ${r1} - ${r2}", token, requestId))

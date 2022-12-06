@@ -20,16 +20,13 @@ import com.github.dockerjava.core.DockerClientBuilder
 import com.twitter.util.logging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import slick.jdbc.JdbcBackend.Database
-
-import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
 class TheGreatManager {
+  implicit val ec = ExecutionContext.global
   private val logging: Logger = Logger(this.getClass)
 
-  implicit val client: Database = Database.forConfig("mysql")
-  private val executorService = Executors.newFixedThreadPool(50)
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(executorService)
+  implicit val client: Database = Database.forConfig("managers.mysql")
 
   logging.info("Creating repositories...")
   implicit val userRepository: UserRepository = new UserRepositoryImpl()

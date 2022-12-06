@@ -26,16 +26,36 @@ class UserRepositoryImpl(implicit client: Database, implicit val ec: scala.concu
   lazy val users = TableQuery[UserTable]
 
   override def getById(id: Long): Future[Option[User]] = {
-    client.run(users.filter(_.id === id).result.headOption)
+    logging.debug(s"Searching for user with by id $id")
+    val start = System.currentTimeMillis
+    client.run(users.filter(_.id === id).result.headOption) map {
+      case Some(user) =>
+        val end = System.currentTimeMillis
+        val time = (end - start).toFloat / 1000
+        logging.debug(s"User getById took $time with id $id to find a user")
+        Some(user)
+      case None =>
+        val end = System.currentTimeMillis
+        val time = (end - start).toFloat / 1000
+        logging.debug(s"User getById took $time with id $id to not find a user")
+        None
+    }
   }
 
   override def getByEmail(email: String): Future[Option[User]] = {
     logging.debug(s"Searching for user with email $email")
+    val start = System.currentTimeMillis
     client.run(users.filter(_.email === email).result.headOption) map {
       case Some(user) =>
-        logging.info("Found user by emai;!")
+        val end = System.currentTimeMillis
+        val time = (end - start).toFloat / 1000
+        logging.debug(s"getByEmail took $time seconds to find user with email $email")
+        logging.info("Found user by email!")
         Some(user)
       case None =>
+        val end = System.currentTimeMillis
+        val time = (end - start).toFloat / 1000
+        logging.debug(s"getByEmail took $time seconds to not find a user with email $email")
         logging.debug("User not found by email!")
         None
     }

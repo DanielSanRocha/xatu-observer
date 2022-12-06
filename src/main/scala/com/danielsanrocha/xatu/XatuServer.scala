@@ -35,8 +35,16 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private val redisHost = conf.getString("redis.host")
   private val redisPort = conf.getInt("redis.port")
 
-  private val jedisPoolConfig = new JedisPoolConfig()
-  jedisPoolConfig.setMaxTotal(1000)
+  private val jedisPoolConfig = new JedisPoolConfig();
+  jedisPoolConfig.setMaxTotal(400)
+  jedisPoolConfig.setMaxIdle(400)
+  jedisPoolConfig.setMinIdle(200)
+  jedisPoolConfig.setMaxWaitMillis(2)
+  jedisPoolConfig.setBlockWhenExhausted(true)
+  jedisPoolConfig.setTestOnBorrow(true)
+  jedisPoolConfig.setTestOnReturn(true)
+  jedisPoolConfig.setTestWhileIdle(true)
+  jedisPoolConfig.setNumTestsPerEvictionRun(3)
   implicit val cache: JedisPool = new JedisPool(jedisPoolConfig, redisHost, redisPort, 10000)
 
   logging.info("Instantiating docker client...")

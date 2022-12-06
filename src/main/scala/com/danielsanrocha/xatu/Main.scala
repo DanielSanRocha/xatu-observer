@@ -10,9 +10,7 @@ import scala.language.postfixOps
 import com.danielsanrocha.xatu.commons.Security
 import com.danielsanrocha.xatu.repositories.{LogRepository, LogRepositoryImpl}
 import org.apache.log4j.BasicConfigurator
-
-import java.util.concurrent.Executors
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits.{global => ec}
 
 object Main extends App {
   BasicConfigurator.configure()
@@ -31,12 +29,8 @@ object Main extends App {
   if (args.length == 0) {
     println(usage)
   } else {
-    logging.info("Loading execution context...")
-    val executorService = Executors.newFixedThreadPool(50)
-    val ec: ExecutionContext = ExecutionContext.fromExecutor(executorService)
-
     logging.info("Loading slick MySQLClient...")
-    implicit val client: Database = Database.forConfig("mysql")
+    implicit val client: Database = Database.forConfig("api.mysql")
 
     logging.info("Creating logs repository...")
     implicit val logRepository: LogRepository = new LogRepositoryImpl("elasticsearch", ec)

@@ -35,9 +35,10 @@ class AuthorizeFilter(authorizationHeader: String, implicit val cachePool: Jedis
       }
       case Some(header) =>
         val cache = cachePool.getResource
+        val start = System.currentTimeMillis
         cache.get(s"token:$header") match {
           case null =>
-            cachePool.returnResource(cache)
+            cache.close()
             logging.warn(s"(x-request-id - ${requestId}) User sent header Authorization: ${header} which do not exist on the cache server!")
             val errorResponse = Response()
             errorResponse.statusCode = 403
@@ -46,11 +47,14 @@ class AuthorizeFilter(authorizationHeader: String, implicit val cachePool: Jedis
             Future(errorResponse)
 
           case credentialJson =>
-            cachePool.returnResource(cache)
+            cache.close()
+            val end = System.currentTimeMillis
+            val time = (end - start).toFloat / 1000
+            logging.debug(s"(x-request-id - ${requestId}) Redis took ${time} seconds to find the authorization token!")
+
             logging.debug(s"(x-request-id - $requestId) Token found on cache server, decoding...")
             val credential = jsonMapper.readValue(credentialJson, classOf[TimedCredential])
             Contexts.local.let(TimedCredential, credential) { service(request) }
-
         }
     }
   }

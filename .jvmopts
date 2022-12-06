@@ -1,3 +1,1 @@
--Xmx1G
--XX:+UseConcMarkSweepGC
--XX:+CMSClassUnloadingEnabled
+-Xss256k

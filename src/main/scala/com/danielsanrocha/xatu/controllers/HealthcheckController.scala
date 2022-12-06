@@ -34,11 +34,11 @@ class HealthcheckController(
       cache.set("random", random)
       val random2 = cache.get("random")
 
-      cachePool.returnResource(cache)
+      cache.close()
       if (random != random2) Some(new Exception("Problems with redis..."))
       else None
     } recover { case e: Exception =>
-      cachePool.returnResource(cache)
+      cache.close()
       Some(e)
     }
 
