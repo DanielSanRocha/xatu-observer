@@ -32,7 +32,7 @@ object Main extends App {
     println(usage)
   } else {
     logging.info("Loading execution context...")
-    val executorService = Executors.newFixedThreadPool(8)
+    val executorService = Executors.newFixedThreadPool(50)
     val ec: ExecutionContext = ExecutionContext.fromExecutor(executorService)
 
     logging.info("Loading slick MySQLClient...")

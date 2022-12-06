@@ -28,7 +28,7 @@ class TheGreatManager {
   private val logging: Logger = Logger(this.getClass)
 
   implicit val client: Database = Database.forConfig("mysql")
-  private val executorService = Executors.newFixedThreadPool(8)
+  private val executorService = Executors.newFixedThreadPool(50)
   implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(executorService)
 
   logging.info("Creating repositories...")
