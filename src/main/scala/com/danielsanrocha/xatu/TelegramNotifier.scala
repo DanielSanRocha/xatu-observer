@@ -1,12 +1,11 @@
 package com.danielsanrocha.xatu
 
-import com.danielsanrocha.xatu.models.internals.Status
 import com.danielsanrocha.xatu.services.{APIService, ContainerService, ServiceService}
 import com.twitter.util.logging.Logger
 import scalaj.http.{Http, HttpOptions}
 
 import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class TelegramNotifier(
     token: String,
@@ -21,27 +20,38 @@ class TelegramNotifier(
   private val ex = new ScheduledThreadPoolExecutor(1)
 
   val task: Runnable = () => {
+    logging.info("Searching for containers,services and apis unhealthy to notify...")
+
     containerService.getAll(1000, 0) map { containers =>
       containers map { cont =>
+        logging.debug(s"Container ${cont.name} status: ${cont.status}")
         if (cont.status == 'F') notify(s"Container ${cont.name} is not running!")
       }
+    } recover { case e: Exception =>
+      logging.error(s"Error searching for containers to notify. Message: ${e.getMessage}")
     }
 
     apiService.getAll(1000, 0) map { apis =>
       apis map { api =>
+        logging.debug(s"API ${api.name} status: ${api.status}")
         if (api.status == 'F') notify(s"API ${api.name} is broken!")
       }
+    } recover { case e: Exception =>
+      logging.error(s"Error searching for containers to notify. Message: ${e.getMessage}")
     }
 
     serviceService.getAll(1000, 0) map { services =>
       services map { s =>
+        logging.debug(s"Service ${s.name} status: ${s.status}")
         if (s.status == 'F') notify(s"Service ${s.name} is not running!")
       }
+    } recover { case e: Exception =>
+      logging.error(s"Error searching for containers to notify. Message: ${e.getMessage}")
     }
   }
 
-  def notify(message: String): Unit = {
-    logging.error(s"TelegramNotifier message: $message")
+  private def notify(message: String): Unit = {
+    logging.debug(s"TelegramNotifier message: $message")
     val route = s"https://api.telegram.org/bot$token/sendMessage";
 
     val result = Http(route)
@@ -59,6 +69,7 @@ class TelegramNotifier(
   var interval: Option[ScheduledFuture[_]] = None
 
   def start(): Unit = {
-    interval = Some(ex.scheduleAtFixedRate(task, 60, 200, TimeUnit.SECONDS))
+    logging.debug("Starting TelegramNotifier!")
+    interval = Some(ex.scheduleAtFixedRate(task, 20, 60, TimeUnit.SECONDS))
   }
 }

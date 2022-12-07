@@ -20,6 +20,8 @@ class StatusController(
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Status route called, returning managers info...")
 
-    response.ok(ManagerStatus(apiObserverManager.status(), logServiceObserverManager.status(), serviceObserverManager.status(), logContainerManager.status()))
+    val used = ((Runtime.getRuntime.totalMemory() - Runtime.getRuntime.freeMemory()) / 1_000_000).toInt
+
+    response.ok(ManagerStatus(apiObserverManager.status(), logServiceObserverManager.status(), serviceObserverManager.status(), logContainerManager.status(), Thread.activeCount(), used))
   }
 }

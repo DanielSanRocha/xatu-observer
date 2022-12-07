@@ -40,7 +40,7 @@ java -jar xatu-observer-assembly-{version}.jar createIndex
 You can start the server with
 
 ```bash
-java -Xms256m -Xmx512m -Xss1m -Dscala.concurrent.context.numThreads=40 -Dscala.concurrent.context.maxThreads=100 -jar xatu-observer-assembly-{version}.jar start
+java -Xms256m -Xmx512m -Xss2m -Dscala.concurrent.context.numThreads=40 -Dscala.concurrent.context.maxThreads=200 -jar xatu-observer-assembly-{version}.jar start
 ```
 
 You can transform this in a service, copy the jar file to your server and create .service file, like this:
@@ -50,6 +50,9 @@ You can transform this in a service, copy the jar file to your server and create
 Description=XatuObserver
 
 [Service]
+Restart=always
+RuntimeMaxSec=300
+
 Environment="PORT=<PORT>"
 Environment="MYSQL_USER=<MYSQL_USER>"
 Environment="MYSQL_PASSWORD=<MYSQL_PASSWORD>"

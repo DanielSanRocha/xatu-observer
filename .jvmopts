@@ -1,1 +1,2 @@
--Xss256k
+-Xmx2G
+-Xss2M

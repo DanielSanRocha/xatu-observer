@@ -18,7 +18,8 @@ import slick.jdbc.MySQLProfile.api.Database
 import java.util.concurrent.TimeUnit
 import com.twitter.util._
 
-class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository) extends HttpServer {
+class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository, implicit val greatManager: TheGreatManager)
+    extends HttpServer {
   private val logging: Logger = Logger(this.getClass)
 
   logging.info("Loading configuration file and accessing it...")
@@ -85,9 +86,6 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
 
   private val timeout = conf.getLong("api.timeout")
   private val timeoutFilter = new TimeoutFilter(Duration(timeout, TimeUnit.MILLISECONDS), ec)
-
-  logging.info(s"Instantiating the great manager...")
-  private val greatManager = new TheGreatManager()
 
   override protected def configureHttp(router: HttpRouter): Unit = {
     router

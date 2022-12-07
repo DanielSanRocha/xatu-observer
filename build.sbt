@@ -1,4 +1,4 @@
-ThisBuild / version := "1.0.0"
+ThisBuild / version := "1.0.1"
 
 ThisBuild / scalaVersion := "2.13.10"
 
@@ -30,6 +30,8 @@ lazy val versions = new {
   val jersey = "2.37"
   val hk2 = "2.6.1"
   val guava = "2.26-b03"
+  val logback = "1.1.7"
+  val netty = "4.0.27.Final"
 }
 
 lazy val versionsTest = new {
@@ -59,11 +61,9 @@ libraryDependencies ++= Seq(
   "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,
   "org.glassfish.hk2" % "hk2-api" % versions.hk2,
   "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava,
-  "com.twitter" %% "twitter-server-slf4j-log4j12" % versions.twitter
-)
-
-excludeDependencies ++= Seq(
-  ExclusionRule("org.slf4j", "log4j-over-slf4j")
+  "com.twitter" %% "twitter-server-logback-classic" % versions.twitter,
+  "ch.qos.logback" % "logback-classic" % versions.logback,
+  "io.netty" % "netty-transport-native-epoll" % versions.netty
 )
 
 Test / parallelExecution := false

@@ -6,8 +6,10 @@
             </Pattern>
         </layout>
     </appender>
-    <root level="ALL">
+
+    <root level="OFF">
         <appender-ref ref="CONSOLE" />
     </root>
-    <logger name="com.danielsanrocha.xatu" level="ALL"/>
+
+    <logger name="com.danielsanrocha.xatu" level="DEBUG"/>
 </configuration>

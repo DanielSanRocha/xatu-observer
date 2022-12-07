@@ -4,17 +4,14 @@ import com.twitter.util.logging.Logger
 import slick.jdbc.MySQLProfile.api._
 
 import scala.io.Source
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import com.danielsanrocha.xatu.commons.Security
 import com.danielsanrocha.xatu.repositories.{LogRepository, LogRepositoryImpl}
-import org.apache.log4j.BasicConfigurator
 import scala.concurrent.ExecutionContext.Implicits.{global => ec}
 
 object Main extends App {
-  BasicConfigurator.configure()
-
   private val usage = """
   Usage
 
@@ -37,6 +34,10 @@ object Main extends App {
 
     args(0) match {
       case "start" =>
+        logging.info(s"Instantiating the great manager...")
+        implicit val greatManager = new TheGreatManager()
+        greatManager.start()
+        logging.info(s"Starting API...")
         val server = new XatuServer()
         server.main(args)
 

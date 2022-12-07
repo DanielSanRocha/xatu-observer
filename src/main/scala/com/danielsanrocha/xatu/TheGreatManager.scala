@@ -55,19 +55,22 @@ class TheGreatManager {
 
   private val managersEnable = conf.getBoolean("managers.enabled")
 
-  if (managersEnable) {
-    logging.info("Starting managers...")
-    apiObserverManager.start()
-    logServiceManager.start()
-    serviceObserverManager.start()
-    logContainerManager.start()
-  }
   private val token = conf.getString("telegram.bot_token")
-  if (token != "inactive") {
-    logging.info("Starting TelegramNotifier...")
-    val chatId = conf.getString("telegram.chat_id")
-    val telegramNotifier = new TelegramNotifier(token = token, chatId = chatId, containerService, apiService, serviceService, ec)
-    telegramNotifier.start()
+  private val chatId = conf.getString("telegram.chat_id")
+  private val telegramNotifier = new TelegramNotifier(token = token, chatId = chatId, containerService, apiService, serviceService, ec)
+
+  def start(): Unit = {
+    if (token != "inactive") {
+      logging.info("Starting TelegramNotifier...")
+      telegramNotifier.start()
+    }
+    if (managersEnable) {
+      logging.info("Starting managers...")
+      apiObserverManager.start()
+      logServiceManager.start()
+      serviceObserverManager.start()
+      logContainerManager.start()
+    }
   }
 
   val statusController = new StatusController()

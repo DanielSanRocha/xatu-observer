@@ -23,7 +23,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
     try {
       directoryPath.list() foreach { filename =>
         if (regex matches filename) {
-          logging.debug(s"File $filename i::match regex! Observing it...")
+          logging.debug(s"File $filename match regex! Observing it...")
 
           val b: BufferedReader = files.get(filename) match {
             case Some(bufferedReader) =>
