@@ -1,0 +1,77 @@
+services:
+  mysql:
+    container_name: xatu-mysql
+    image: "mysql:8.0.32"
+    networks:
+      - xatu_network
+    environment:
+      MYSQL_DATABASE: xatu
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_TCP_PORT: 3306
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 2s
+      timeout: 60s
+      retries: 30
+      
+  redis:
+    container_name: xatu-redis
+    image: "redis:5.0.7-alpine"
+    networks:
+      - xatu_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 2s
+      timeout: 60s
+      retries: 30
+
+  elasticsearch:
+    container_name: xatu-elasticsearch
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.9"
+    networks:
+      - xatu_network
+    environment:
+      discovery.type: single-node
+      discovery.seed_hosts: elasticsearch
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 2s
+      timeout: 60s
+      retries: 30
+
+  xatu:
+    container_name: xatu
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - xatu_network
+    environment:
+      HOST: 0.0.0.0
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      REDIS_HOST: redis
+      ELASTICSEARCH_HOST: "http://elasticsearch"
+      ROOT_LOG_LEVEL: ${ROOT_LOG_LEVEL}
+      LOG_LEVEL: ${LOG_LEVEL}
+      PORT: ${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8089/" ]
+      interval: 10s
+      timeout: 110s
+      retries: 11
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+networks:
+  xatu_network:
+    driver: bridge

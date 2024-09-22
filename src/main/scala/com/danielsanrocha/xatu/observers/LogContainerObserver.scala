@@ -7,7 +7,7 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.async.ResultCallback
 import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.core.command.LogContainerResultCallback
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import java.io.Closeable
 

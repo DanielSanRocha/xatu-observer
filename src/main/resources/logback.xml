@@ -1,15 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>
-                %d{HH:mm:ss.SSS} [%t] %-5level %logger{50} - %msg%n
-            </Pattern>
-        </layout>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+    <import class="ch.qos.logback.classic.filter.ThresholdFilter"/>?
+
+    <property name="ROOT_LOG_LEVEL" value="${ROOT_LOG_LEVEL:-ERROR}" />
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-DEBUG}" />
+
+    <appender name="STDOUT" class="ConsoleAppender">
+        <target>System.out</target>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>
+                stdout: [%d{HH:mm:ss.SSS}] [%t] %-5level %logger{50} - %msg%n
+            </pattern>
+        </encoder>
     </appender>
 
-    <root level="OFF">
-        <appender-ref ref="CONSOLE" />
-    </root>
+    <appender name="STDERR" class="ConsoleAppender">
+        <target>System.err</target>
+        <filter class="ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>
+                stderr: [%d{HH:mm:ss.SSS}] [%t] %-5level %logger{50} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
 
-    <logger name="com.danielsanrocha.xatu" level="DEBUG"/>
+    <logger name="com.danielsanrocha.xatu" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDERR" />
+    </logger>
+
+    <root level="${ROOT_LOG_LEVEL}">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDERR" />
+    </root>
 </configuration>

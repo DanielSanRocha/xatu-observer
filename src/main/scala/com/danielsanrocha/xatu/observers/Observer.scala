@@ -1,7 +1,7 @@
 package com.danielsanrocha.xatu.observers
 
 import com.danielsanrocha.xatu.models.internals.{Data, SimpleStatus, Status}
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
 

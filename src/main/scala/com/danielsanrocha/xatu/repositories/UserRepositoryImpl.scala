@@ -7,7 +7,7 @@ import com.danielsanrocha.xatu.models.internals.User
 import slick.jdbc.MySQLProfile.api._
 import com.danielsanrocha.xatu.models.internals.User
 import com.danielsanrocha.xatu.commons.FutureConverters.RichScalaFuture
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 class UserRepositoryImpl(implicit client: Database, implicit val ec: scala.concurrent.ExecutionContext) extends UserRepository {
   private val logging: Logger = Logger(this.getClass)

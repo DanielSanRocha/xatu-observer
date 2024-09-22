@@ -2,21 +2,21 @@ package com.danielsanrocha.xatu
 
 import com.danielsanrocha.xatu.controllers._
 import com.danielsanrocha.xatu.filters.{AuthorizeFilter, CORSFilter, ExceptionHandlerFilter, RequestIdFilter, TimeoutFilter}
-import com.danielsanrocha.xatu.managers.{APIObserverManager, LogContainerObserverManager, LogServiceObserverManager, ServiceObserverManager}
 import com.danielsanrocha.xatu.repositories._
 import com.danielsanrocha.xatu.services._
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.DockerClientBuilder
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import redis.clients.jedis.{JedisPool, JedisPoolConfig}
 import slick.jdbc.MySQLProfile.api.Database
 
 import java.util.concurrent.TimeUnit
 import com.twitter.util._
+
+import scala.concurrent.duration.FiniteDuration
 
 class XatuServer(implicit val client: Database, implicit val ec: scala.concurrent.ExecutionContext, implicit val logRepository: LogRepository, implicit val greatManager: TheGreatManager)
     extends HttpServer {
@@ -25,12 +25,13 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   logging.info("Loading configuration file and accessing it...")
   private implicit val conf: Config = ConfigFactory.load()
 
+  override def defaultHttpServerName: String = "XatuObserver"
+
+  private val host = conf.getString("api.host")
   private val port = conf.getInt("api.port")
-  private val appName = conf.getString("api.name")
+  override def defaultHttpPort: String = s"$host:$port"
 
-  override protected def defaultHttpPort: String = s":${port}"
-
-  override protected def defaultHttpServerName: String = appName
+  override def disableAdminHttpServer = true
 
   logging.info("Connecting to redis...")
   private val redisHost = conf.getString("redis.host")
@@ -68,6 +69,8 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private val authorizationHeader = conf.getString("api.auth.header")
 
   logging.info("Instantiating controllers...")
+  private val indexController = new IndexController()
+  implicit val healthcheckTimeout: FiniteDuration = new FiniteDuration(conf.getInt("api.healthcheck_timeout"), TimeUnit.MILLISECONDS)
   private val healthcheckController = new HealthcheckController()
   private val notFoundController = new NotFoundController()
   private val loginController = new LoginController()
@@ -93,6 +96,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
       .filter(requestIdFilter)
       .filter(exceptionHandlerFilter)
       .filter(timeoutFilter)
+      .add(indexController)
       .add(loginController)
       .add(authorizeFilter, userController)
       .add(authorizeFilter, serviceController)

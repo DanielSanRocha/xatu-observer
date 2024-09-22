@@ -2,7 +2,7 @@ package com.danielsanrocha.xatu.observers
 
 import com.danielsanrocha.xatu.models.internals.Service
 import com.danielsanrocha.xatu.services.ServiceService
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import java.io.{BufferedReader, InputStreamReader}
 

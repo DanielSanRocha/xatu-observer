@@ -2,7 +2,7 @@ package com.danielsanrocha.xatu.observers
 
 import com.danielsanrocha.xatu.models.internals.API
 import com.danielsanrocha.xatu.services.APIService
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import scalaj.http.{Http, HttpOptions}
 
 class APIObserver(api: API, implicit val service: APIService) extends Observer[API](api) {
@@ -23,7 +23,7 @@ class APIObserver(api: API, implicit val service: APIService) extends Observer[A
       }
     } catch {
       case e: Exception =>
-        logging.warn(s"Network problem with API(id = ${_data.id}, name = ${_data.name}) route $route. Exception: ${e.getMessage}")
+        logging.error(s"Network problem with API(id = ${_data.id}, name = ${_data.name}) route $route. Exception: ${e.getMessage}")
         logging.debug(s"Setting status to failed API(id = ${_data.id}, name = ${_data.name})")
         service.setStatus(_data.id, 'F')
     }

@@ -7,7 +7,7 @@ import com.danielsanrocha.xatu.services.ServiceService
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 class ServiceController(implicit service: ServiceService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)

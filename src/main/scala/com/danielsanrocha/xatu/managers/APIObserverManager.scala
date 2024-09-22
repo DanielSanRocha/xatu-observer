@@ -1,7 +1,7 @@
 package com.danielsanrocha.xatu.managers
 
 import com.danielsanrocha.xatu.models.internals.API
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.danielsanrocha.xatu.observers.APIObserver
 import com.danielsanrocha.xatu.services.APIService
 

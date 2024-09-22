@@ -1,6 +1,6 @@
 package com.danielsanrocha.xatu.services
 
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import scala.concurrent.Future
 
 import com.danielsanrocha.xatu.repositories.UserRepository

@@ -1,7 +1,7 @@
 package com.danielsanrocha.xatu.managers
 
 import com.github.dockerjava.api.DockerClient
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.observers.LogContainerObserver

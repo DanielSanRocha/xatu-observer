@@ -2,7 +2,7 @@ package com.danielsanrocha.xatu.controllers
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.finatra.http.Controller
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.danielsanrocha.xatu.models.internals.RequestId
 import com.danielsanrocha.xatu.models.requests.LogSearchRequest
 import com.danielsanrocha.xatu.models.responses.HitsResult

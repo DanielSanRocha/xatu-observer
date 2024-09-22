@@ -1,6 +1,6 @@
 package com.danielsanrocha.xatu.controllers
 
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.finagle.context.Contexts

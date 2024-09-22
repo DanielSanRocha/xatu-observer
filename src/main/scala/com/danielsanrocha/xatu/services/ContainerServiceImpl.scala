@@ -4,7 +4,7 @@ import com.danielsanrocha.xatu.models.internals.{Container, ContainerInfo, NewCo
 import com.danielsanrocha.xatu.models.responses.ContainerResponse
 import com.danielsanrocha.xatu.repositories.ContainerRepository
 import com.github.dockerjava.api.DockerClient
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.concurrent.Future

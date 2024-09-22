@@ -3,7 +3,7 @@ package com.danielsanrocha.xatu.services
 import com.danielsanrocha.xatu.exceptions.NotFoundException
 import com.danielsanrocha.xatu.models.internals.{NewAPI, API}
 import com.danielsanrocha.xatu.repositories.APIRepository
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import scala.concurrent.Future
 import scala.language.postfixOps

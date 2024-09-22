@@ -17,16 +17,13 @@ import com.danielsanrocha.xatu.repositories.{
 import com.danielsanrocha.xatu.services.{APIService, APIServiceImpl, ContainerService, ContainerServiceImpl, LogService, LogServiceImpl, ServiceService, ServiceServiceImpl}
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.core.DockerClientBuilder
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
-import slick.jdbc.JdbcBackend.Database
+import slick.jdbc.MySQLProfile.api._
 import scala.concurrent.ExecutionContext
 
-class TheGreatManager {
-  implicit val ec = ExecutionContext.global
+class TheGreatManager(implicit val client: Database, implicit val ec: ExecutionContext) {
   private val logging: Logger = Logger(this.getClass)
-
-  implicit val client: Database = Database.forConfig("managers.mysql")
 
   logging.info("Creating repositories...")
   implicit val userRepository: UserRepository = new UserRepositoryImpl()
@@ -56,14 +53,19 @@ class TheGreatManager {
   private val managersEnable = conf.getBoolean("managers.enabled")
 
   private val token = conf.getString("telegram.bot_token")
-  private val chatId = conf.getString("telegram.chat_id")
-  private val telegramNotifier = new TelegramNotifier(token = token, chatId = chatId, containerService, apiService, serviceService, ec)
 
   def start(): Unit = {
     if (token != "inactive") {
       logging.info("Starting TelegramNotifier...")
+
+      val chatId = conf.getString("telegram.chat_id")
+      val telegramNotifier = new TelegramNotifier(token = token, chatId = chatId, containerService, apiService, serviceService, ec)
+
       telegramNotifier.start()
+    } else {
+      logging.info("Telegram token is to inactive.")
     }
+
     if (managersEnable) {
       logging.info("Starting managers...")
       apiObserverManager.start()

@@ -1,30 +1,29 @@
 package com.danielsanrocha.xatu.filters
 
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finatra.http.exceptions.ExceptionManager
 import com.twitter.util.Future
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 import redis.clients.jedis.JedisPool
 
 import com.danielsanrocha.xatu.models.internals.{RequestId, TimedCredential}
-import com.danielsanrocha.xatu.models.responses.{ServerMessage}
+import com.danielsanrocha.xatu.models.responses.ServerMessage
 
 @Singleton
 class AuthorizeFilter(authorizationHeader: String, implicit val cachePool: JedisPool) extends SimpleFilter[Request, Response] {
-  val logging: Logger = Logger(this.getClass)
-  val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build();
+  private val logging = Logger(this.getClass)
+  private val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build();
 
   override def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
     val requestId = Contexts.local.get(RequestId).head.requestId
-    logging.warn(s"(x-request-id - ${requestId}) Checking for Authorization header...")
+    logging.debug(s"(x-request-id - ${requestId}) Checking for Authorization header...")
 
     request.headerMap.get(authorizationHeader) match {
-      case None => {
+      case None =>
         logging.warn(s"(x-request-id - ${requestId}) $authorizationHeader header missing, forbidden!")
         val forbiddenResponse = Response()
         forbiddenResponse.statusCode = 403
@@ -32,14 +31,14 @@ class AuthorizeFilter(authorizationHeader: String, implicit val cachePool: Jedis
         forbiddenResponse.setContentString(jsonMapper.writeValueAsString(ServerMessage(s"Missing $authorizationHeader header", requestId)))
 
         Future(forbiddenResponse)
-      }
+
       case Some(header) =>
         val cache = cachePool.getResource
         val start = System.currentTimeMillis
         cache.get(s"token:$header") match {
           case null =>
             cache.close()
-            logging.warn(s"(x-request-id - ${requestId}) User sent header Authorization: ${header} which do not exist on the cache server!")
+            logging.debug(s"(x-request-id - ${requestId}) User sent header Authorization: ${header} which do not exist on the cache server!")
             val errorResponse = Response()
             errorResponse.statusCode = 403
             errorResponse.setContentTypeJson()

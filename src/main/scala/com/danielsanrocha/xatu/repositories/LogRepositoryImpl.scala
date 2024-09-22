@@ -4,7 +4,7 @@ import com.danielsanrocha.xatu.exceptions.BadArgumentException
 import com.danielsanrocha.xatu.models.internals.{Log, LogContainer, LogService}
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.typesafe.config.{Config, ConfigFactory}
 import scalaj.http.{Http, HttpOptions}
 
@@ -38,12 +38,12 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
           .execute()
 
         if (result.code != 200) {
-          throw new Exception(s"ES returned status ${result.code}!")
+          throw new Exception(s"ES returned status ${result.code}! Message: ${result.body}")
         }
 
       } catch {
         case e: Exception =>
-          logging.warn(s"Error creating index ${esIndex} on elasticsearch. Error: ${e.getMessage}")
+          logging.error(s"Error creating index ${esIndex} on elasticsearch. Error: ${e.getMessage}")
           throw e
       }
     }

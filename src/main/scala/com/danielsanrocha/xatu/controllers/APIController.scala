@@ -6,7 +6,7 @@ import com.danielsanrocha.xatu.models.responses.{Created, Deleted, HitsResult, S
 import com.danielsanrocha.xatu.services.{APIService}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finatra.http.Controller
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 class APIController(implicit service: APIService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)

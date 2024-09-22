@@ -3,7 +3,7 @@ package com.danielsanrocha.xatu.managers
 import com.danielsanrocha.xatu.models.internals.Service
 import com.danielsanrocha.xatu.observers.LogServiceObserver
 import com.danielsanrocha.xatu.services.{LogService, ServiceService}
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 class LogServiceObserverManager(implicit val service: ServiceService, override implicit val ec: scala.concurrent.ExecutionContext, implicit val logService: LogService)
     extends Manager[Service, LogServiceObserver](service, ec) {

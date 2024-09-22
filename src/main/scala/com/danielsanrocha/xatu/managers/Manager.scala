@@ -3,13 +3,13 @@ package com.danielsanrocha.xatu.managers
 import com.danielsanrocha.xatu.models.internals.{Data, Status}
 import com.danielsanrocha.xatu.observers.Observer
 import com.danielsanrocha.xatu.services.Service
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
 import scala.collection.mutable
 
 abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Service[DATA], implicit val ec: scala.concurrent.ExecutionContext) {
-  private lazy val logging: Logger = Logger(this.getClass)
+  private val logging: Logger = Logger(this.getClass)
 
   lazy val observers: mutable.Map[Long, OBSERVER] = mutable.Map()
 
@@ -59,7 +59,7 @@ abstract class Manager[DATA <: Data, OBSERVER <: Observer[DATA]](service: Servic
             obs.stop()
             observers.remove(id)
           case Some(id) =>
-            logging.info(s"Keeping observer for id ${id}")
+            logging.debug(s"Keeping observer for id ${id}")
         }
       })
     }

@@ -28,7 +28,6 @@ bin/
 .cache
 
 # intellij idea
-*.log
 *.iml
 *.ipr
 *.iws
@@ -42,9 +41,10 @@ bin/
 .scala_dependencies
 .cache-main
 
-# general
-*.class
-
 lib/
 module/
 META-INF
+
+output.json
+xatu.jar
+start

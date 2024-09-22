@@ -3,7 +3,7 @@ package com.danielsanrocha.xatu.filters
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.Future
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 class CORSFilter extends SimpleFilter[Request, Response] {
   val logging: Logger = Logger(this.getClass)

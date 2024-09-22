@@ -7,11 +7,8 @@ import com.twitter.util.{Duration, Future => TwitterFuture}
 import scala.concurrent.{ExecutionContext, Future => ScalaFuture}
 import com.danielsanrocha.xatu.commons.FutureConverters._
 import com.danielsanrocha.xatu.exceptions.TimeoutException
-import com.danielsanrocha.xatu.models.responses.ServerMessage
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.util.logging.Logger
-
-import scala.util.Success
+import com.typesafe.scalalogging.Logger
 
 class TimeoutFilter(timeout: Duration, implicit val ec: ExecutionContext) extends SimpleFilter[Request, Response] {
   private val logging: Logger = Logger(this.getClass)

@@ -3,57 +3,74 @@ package com.danielsanrocha.xatu.controllers
 import com.danielsanrocha.xatu.models.internals.RequestId
 import com.danielsanrocha.xatu.models.responses.ServerStatus
 import com.danielsanrocha.xatu.repositories.LogRepository
+import com.danielsanrocha.xatu.commons.FutureTimeout._
 import com.github.dockerjava.api.DockerClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import io.jvm.uuid.UUID
-import redis.clients.jedis.{Jedis, JedisPool}
+import redis.clients.jedis.JedisPool
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 class HealthcheckController(
     implicit val cachePool: JedisPool,
     implicit val client: Database,
     implicit val dockerClient: DockerClient,
     implicit val logRepository: LogRepository,
-    implicit val ec: scala.concurrent.ExecutionContext
+    implicit val ec: scala.concurrent.ExecutionContext,
+    implicit val timeout: FiniteDuration
 ) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/healthcheck") { request: Request =>
+  get("/healthcheck") { _: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Healthcheck called, checking redis, docker, elasticsearch and mysql...")
 
-    val random = UUID.random.toString
+    val redisFuture = Future[Option[Throwable]] {
+      val random = UUID.random.toString
+      val cache = cachePool.getResource
 
-    val cache = cachePool.getResource
-    val redisFuture = Future[Option[Exception]] {
-      cache.set("random", random)
-      val random2 = cache.get("random")
-
-      cache.close()
-      if (random != random2) Some(new Exception("Problems with redis..."))
-      else None
-    } recover { case e: Exception =>
-      cache.close()
+      try {
+        cache.set("random", random)
+        val random2 = cache.get("random")
+        if (random != random2) throw new Exception("Problems with redis...")
+        cache.close()
+      } catch {
+        case e: Throwable =>
+          cache.close()
+          throw e
+      }
+      None
+    } recover { case e: Throwable =>
+      logging.error(s"Error accessing Redis! Message: ${e.getMessage}")
       Some(e)
     }
 
     val mysqlFuture = client.run(sql"show tables".as[String]) map { _ =>
       None
-    } recover { case e: Exception => Some(e) }
+    } withTimeout (ec, timeout) recover { case e: Throwable =>
+      logging.error(s"Error accessing mysql! Message: ${e.getMessage}")
+      Some(e)
+    }
 
-    val dockerFuture = Future[Option[Exception]] {
+    val dockerFuture = Future[Option[Throwable]] {
       dockerClient.pingCmd().exec()
       None
-    } recover { case e: Exception => Some(e) }
+    } withTimeout (ec, timeout) recover { case e: Throwable =>
+      logging.error(s"Error accessing Docker! Message: ${e.getMessage}")
+      Some(e)
+    }
 
     val elasticsearchFuture = logRepository.status() map { _ =>
       None
-    } recover { case e: Exception => Some(e) }
+    } withTimeout (ec, timeout) recover { case e: Throwable =>
+      logging.error(s"Error accessing ElasticSearch! Message: ${e.getMessage}")
+      Some(e)
+    }
 
     Future.sequence(Seq(redisFuture, mysqlFuture, dockerFuture, elasticsearchFuture)) map { result =>
       var flag = false

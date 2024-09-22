@@ -1,6 +1,6 @@
 package com.danielsanrocha.xatu
 
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import slick.jdbc.MySQLProfile.api._
 
 import scala.io.Source
@@ -15,19 +15,26 @@ object Main extends App {
   private val usage = """
   Usage
 
-  start: Start the server
-  createTables: Create tables on the database
-  createIndex: Create ES index for logs
-  hash <password>: Hash a password
+  start: Start the server.
+  createTables: Create tables on the database.
+  createIndex: Create ES index for logs.
+  createUser: Create an user, you will be prompt for the info.
 
   """
-  private val logging: Logger = Logger(this.getClass)
+  private val logging = Logger(this.getClass)
+  logging.info("Starting the application...")
+
+  logging.error("Testing logging.error")
+  logging.warn("Testing logging.warn")
+  logging.info("Testing logging.info")
+  logging.debug("Testing logging.debug")
+  logging.trace("Testing logging.trace")
 
   if (args.length == 0) {
     println(usage)
   } else {
     logging.info("Loading slick MySQLClient...")
-    implicit val client: Database = Database.forConfig("api.mysql")
+    implicit val client: Database = Database.forConfig("mysql")
 
     logging.info("Creating logs repository...")
     implicit val logRepository: LogRepository = new LogRepositoryImpl("elasticsearch", ec)
@@ -35,33 +42,51 @@ object Main extends App {
     args(0) match {
       case "start" =>
         logging.info(s"Instantiating the great manager...")
-        implicit val greatManager = new TheGreatManager()
+        implicit val greatManager: TheGreatManager = new TheGreatManager()
         greatManager.start()
         logging.info(s"Starting API...")
         val server = new XatuServer()
         server.main(args)
 
       case "createTables" =>
+        logging.info("Creating tb_users table...")
         val userQuery = Source.fromResource("queries/CreateUsersTable.sql").mkString
-        Await.result(client.run(sqlu"#$userQuery"), Duration.Inf)
+        Await.result(client.run(sqlu"#$userQuery"), atMost = 10 second)
 
+        logging.info("Creating tb_services table...")
         val serviceQuery = Source.fromResource("queries/CreateServicesTable.sql").mkString
-        Await.result(client.run(sqlu"#$serviceQuery"), Duration.Inf)
+        Await.result(client.run(sqlu"#$serviceQuery"), atMost = 10 second)
 
+        logging.info("Creating tb_apis table...")
         val APIQuery = Source.fromResource("queries/CreateAPIsTable.sql").mkString
-        Await.result(client.run(sqlu"#$APIQuery"), Duration.Inf)
+        Await.result(client.run(sqlu"#$APIQuery"), atMost = 10 second)
 
+        logging.info("Creating tb_containers table...")
         val containerQuery = Source.fromResource("queries/CreateContainersTable.sql").mkString
-        Await.result(client.run(sqlu"#$containerQuery"), Duration.Inf)
+        Await.result(client.run(sqlu"#$containerQuery"), atMost = 10 second)
 
       case "createIndex" =>
+        logging.info("Creating index...")
         Await.result(logRepository.createIndex(), atMost = 10 second)
 
-      case "hash" =>
-        args.length match {
-          case 2 => println(s"Hash: ${Security.hash(args(1))}")
-          case _ => println("Missing parameters or too much parameters to function hash. Ex: java -jar main.jar hash <password>")
+      case "createUser" =>
+        val stdin = System.console()
+        println("Enter username:")
+        val name = stdin.readLine()
+        println("Enter email:")
+        val email = stdin.readLine()
+        println("Enter password:")
+        val password = stdin.readPassword().mkString
+        println("Confirm password:")
+        val confirmPassword = stdin.readPassword().mkString
+
+        if (password != confirmPassword) {
+          throw new Exception("Password did not match!")
         }
+
+        logging.info("Creating user...")
+        Await.result(client.run(sqlu"INSERT INTO tb_users (name,email,password) VALUES ($name,$email,${Security.hash(password)});"), atMost = 10 second)
+        logging.info("Created!")
 
       case _ => println(usage)
     }

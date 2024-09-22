@@ -2,7 +2,7 @@ package com.danielsanrocha.xatu.observers
 
 import com.danielsanrocha.xatu.models.internals.{LogServiceObserverStatus, Service, Status, LogService => LogServiceModel}
 import com.danielsanrocha.xatu.services.{LogService, ServiceService}
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 
 import java.io.{BufferedReader, File, FileReader}
 import java.nio.file.Paths
@@ -58,7 +58,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
       }
     } catch {
       case e: Exception =>
-        logging.warn(s"Error collecting logs. Message: ${e.getMessage}")
+        logging.error(s"Error collecting logs. Message: ${e.getMessage}")
     }
   }
 

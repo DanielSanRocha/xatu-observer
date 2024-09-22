@@ -7,16 +7,19 @@ import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.command.PingCmd
 import com.twitter.finagle.http.Status
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, anyString}
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import redis.clients.jedis.{Jedis, JedisPool}
-import redis.clients.jedis.exceptions.JedisException
+import redis.clients.jedis.exceptions.{JedisException, JedisConnectionException}
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 class HealthcheckControllerSpec extends UnitSpec with TestController with TestRepository {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+  implicit val timeout: FiniteDuration = new FiniteDuration(1, TimeUnit.SECONDS)
 
   describe("GET /healthcheck") {
     it("should return ok if all repositories are ok") {
@@ -70,7 +73,6 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       Future {
         val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
         verify(cache, times(1)).close()
-        verify(cache, times(1)).close()
         response.redis should not equal ("Ok")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
@@ -101,6 +103,30 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
         verify(cache, times(1)).close()
         verify(cache, times(1)).close()
         response.redis should equal("Not working...")
+        response.mysql should equal("Ok")
+        response.docker should equal("Ok")
+        response.elasticsearch should equal("Ok")
+      }
+    }
+
+    it("should return 500 if could not connect to redis") {
+      implicit val cachePool: JedisPool = mock[JedisPool]
+      implicit val dockerClient: DockerClient = mock[DockerClient]
+      implicit val logRepository: LogRepository = mock[LogRepository]
+
+      when(cachePool.getResource).thenThrow(new JedisConnectionException("jujuba"))
+
+      when(logRepository.status()).thenReturn(Future())
+
+      val pingCmd = mock[PingCmd]
+      when(dockerClient.pingCmd()).thenReturn(pingCmd)
+
+      val controller = new HealthcheckController()
+      val server = createServer(controller)
+
+      Future {
+        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        response.redis should equal("jujuba")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
         response.elasticsearch should equal("Ok")

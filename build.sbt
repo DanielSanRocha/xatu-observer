@@ -1,4 +1,4 @@
-ThisBuild / version := "1.0.1"
+ThisBuild / version := "2.0.0"
 
 ThisBuild / scalaVersion := "2.13.10"
 
@@ -8,9 +8,14 @@ lazy val root = (project in file("."))
 assemblyMergeStrategy in assembly := {
   case x if x.contains("InjectionManagerFactory") => MergeStrategy.first
   case x if x.contains("ServiceLocatorGenerator") => MergeStrategy.first
-  case PathList("META-INF", xs @ _*)              => MergeStrategy.discard
-  case "reference.conf"                           => MergeStrategy.concat
-  case _                                          => MergeStrategy.first
+  case PathList("META-INF", xs @ _*) =>
+    xs map { _.toLowerCase } match {
+      case "services" :: xs =>
+        MergeStrategy.filterDistinctLines
+      case _ => MergeStrategy.discard
+    }
+  case "reference.conf" => MergeStrategy.concat
+  case _                => MergeStrategy.first
 }
 
 lazy val versions = new {
@@ -21,7 +26,7 @@ lazy val versions = new {
   val activation = "1.2.0"
   val scalaUUID = "0.3.1"
   val jedis = "4.3.0"
-  val slick = "3.4.1"
+  val slick = "3.5.1"
   val mysql = "8.0.31"
   val scalaj = "2.4.2"
   val uJson = "2.0.0"
@@ -30,7 +35,8 @@ lazy val versions = new {
   val jersey = "2.37"
   val hk2 = "2.6.1"
   val guava = "2.26-b03"
-  val logback = "1.1.7"
+  val logback = "1.5.6"
+  val scalaLogging = "3.9.5"
   val netty = "4.0.27.Final"
 }
 
@@ -61,7 +67,7 @@ libraryDependencies ++= Seq(
   "org.glassfish.jersey.inject" % "jersey-hk2" % versions.jersey,
   "org.glassfish.hk2" % "hk2-api" % versions.hk2,
   "org.glassfish.jersey.bundles.repackaged" % "jersey-guava" % versions.guava,
-  "com.twitter" %% "twitter-server-logback-classic" % versions.twitter,
+  "com.typesafe.scala-logging" %% "scala-logging" % versions.scalaLogging,
   "ch.qos.logback" % "logback-classic" % versions.logback,
   "io.netty" % "netty-transport-native-epoll" % versions.netty
 )

@@ -1,7 +1,7 @@
 package com.danielsanrocha.xatu
 
 import com.danielsanrocha.xatu.services.{APIService, ContainerService, ServiceService}
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import scalaj.http.{Http, HttpOptions}
 
 import java.util.concurrent.{ScheduledFuture, ScheduledThreadPoolExecutor, TimeUnit}
@@ -15,12 +15,12 @@ class TelegramNotifier(
     implicit val serviceService: ServiceService,
     implicit val ec: ExecutionContext
 ) {
-  private lazy val logging: Logger = Logger(this.getClass)
+  private val logging: Logger = Logger(this.getClass)
 
   private val ex = new ScheduledThreadPoolExecutor(1)
 
   val task: Runnable = () => {
-    logging.info("Searching for containers,services and apis unhealthy to notify...")
+    logging.info("Searching for containers, services and apis unhealthy to notify...")
 
     containerService.getAll(1000, 0) map { containers =>
       containers map { cont =>
@@ -28,7 +28,7 @@ class TelegramNotifier(
         if (cont.status == 'F') notify(s"Container ${cont.name} is not running!")
       }
     } recover { case e: Exception =>
-      logging.error(s"Error searching for containers to notify. Message: ${e.getMessage}")
+      logging.error(s"Error searching or notifying fault container. Message: ${e.getMessage}")
     }
 
     apiService.getAll(1000, 0) map { apis =>
@@ -37,7 +37,7 @@ class TelegramNotifier(
         if (api.status == 'F') notify(s"API ${api.name} is broken!")
       }
     } recover { case e: Exception =>
-      logging.error(s"Error searching for containers to notify. Message: ${e.getMessage}")
+      logging.error(s"Error searching or notifying fault api. Message: ${e.getMessage}")
     }
 
     serviceService.getAll(1000, 0) map { services =>
@@ -46,7 +46,7 @@ class TelegramNotifier(
         if (s.status == 'F') notify(s"Service ${s.name} is not running!")
       }
     } recover { case e: Exception =>
-      logging.error(s"Error searching for containers to notify. Message: ${e.getMessage}")
+      logging.error(s"Error searching or notifying fault service. Message: ${e.getMessage}")
     }
   }
 
@@ -69,7 +69,7 @@ class TelegramNotifier(
   var interval: Option[ScheduledFuture[_]] = None
 
   def start(): Unit = {
-    logging.debug("Starting TelegramNotifier!")
+    logging.debug("Starting TelegramNotifier...")
     interval = Some(ex.scheduleAtFixedRate(task, 20, 60, TimeUnit.SECONDS))
   }
 }

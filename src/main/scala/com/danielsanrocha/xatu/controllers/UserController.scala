@@ -1,6 +1,6 @@
 package com.danielsanrocha.xatu.controllers
 
-import com.twitter.util.logging.Logger
+import com.typesafe.scalalogging.Logger
 import com.twitter.finagle.context.Contexts
 import com.twitter.finatra.http.{Controller}
 import com.twitter.finagle.http.{Request}
