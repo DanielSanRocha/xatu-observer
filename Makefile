@@ -7,6 +7,7 @@ export ROOT_LOG_LEVEL ?= ERROR
 export LOG_LEVEL ?= INFO
 export PORT ?= 8089
 export NODE_OPTIONS=--openssl-legacy-provider
+export REDIS_PASSWORD ?= redis
 
 help: ## Print help.
 	@IFS=$$'\n' ; \

@@ -2,6 +2,7 @@ package com.danielsanrocha.xatu
 
 import com.danielsanrocha.xatu.controllers._
 import com.danielsanrocha.xatu.filters.{AuthorizeFilter, CORSFilter, ExceptionHandlerFilter, RequestIdFilter, TimeoutFilter}
+import com.danielsanrocha.xatu.models.internals.TTL
 import com.danielsanrocha.xatu.repositories._
 import com.danielsanrocha.xatu.services._
 import com.github.dockerjava.api.DockerClient
@@ -36,18 +37,26 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   logging.info("Connecting to redis...")
   private val redisHost = conf.getString("redis.host")
   private val redisPort = conf.getInt("redis.port")
+  private val redisPassword =
+    try Some(conf.getString("redis.password"))
+    catch { case _: Throwable => None }
+  private implicit val redisTTL: TTL = TTL(conf.getInt("redis.ttl"))
 
   private val jedisPoolConfig = new JedisPoolConfig();
   jedisPoolConfig.setMaxTotal(400)
   jedisPoolConfig.setMaxIdle(400)
   jedisPoolConfig.setMinIdle(200)
-  jedisPoolConfig.setMaxWaitMillis(2)
+  jedisPoolConfig.setMaxWait(java.time.Duration.parse("PT1S"))
   jedisPoolConfig.setBlockWhenExhausted(true)
   jedisPoolConfig.setTestOnBorrow(true)
   jedisPoolConfig.setTestOnReturn(true)
   jedisPoolConfig.setTestWhileIdle(true)
   jedisPoolConfig.setNumTestsPerEvictionRun(3)
-  implicit val cache: JedisPool = new JedisPool(jedisPoolConfig, redisHost, redisPort, 10000)
+
+  implicit val cache: JedisPool = redisPassword match {
+    case Some(p) => new JedisPool(jedisPoolConfig, redisHost, redisPort, 10000, p)
+    case None    => new JedisPool(jedisPoolConfig, redisHost, redisPort, 10000)
+  }
 
   logging.info("Instantiating docker client...")
   implicit val dockerClient: DockerClient = DockerClientBuilder.getInstance.build

@@ -37,6 +37,7 @@ class HealthcheckController(
       try {
         cache.set("random", random)
         val random2 = cache.get("random")
+        cache.expire("random", 5)
         if (random != random2) throw new Exception("Problems with redis...")
         cache.close()
       } catch {

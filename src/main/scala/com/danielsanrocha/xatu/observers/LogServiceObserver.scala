@@ -47,7 +47,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
           while (line != null) {
             line = b.readLine()
             if (line != null) {
-              logging.debug(s"Indexing log of Service(${_data.id}, ${_data.name}). Log: ${line}")
+              logging.debug(s"Indexing log of Service(${_data.id}, ${_data.name}).")
 
               logService.create(LogServiceModel(_data.id, _data.name, filename, line, System.currentTimeMillis()))
             }
@@ -58,7 +58,7 @@ class LogServiceObserver(s: Service, implicit val service: ServiceService, impli
       }
     } catch {
       case e: Exception =>
-        logging.error(s"Error collecting logs. Message: ${e.getMessage}")
+        logging.error(s"Error collecting logs. Message: $e")
     }
   }
 

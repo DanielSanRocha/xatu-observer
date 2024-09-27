@@ -34,6 +34,8 @@ services:
     profiles:
       - all
       - daemon
+    command: >
+      --requirepass ${REDIS_PASSWORD}
 
   elasticsearch:
     container_name: xatu-elasticsearch
@@ -71,6 +73,7 @@ services:
       ROOT_LOG_LEVEL: ${ROOT_LOG_LEVEL}
       LOG_LEVEL: ${LOG_LEVEL}
       PORT: ${PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     ports:
       - "${PORT}:${PORT}"
     volumes:

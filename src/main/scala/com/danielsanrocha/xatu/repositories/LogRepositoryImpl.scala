@@ -78,7 +78,7 @@ class LogRepositoryImpl(config: String, implicit val ec: scala.concurrent.Execut
         .put(jsonMapper.writeValueAsString(log))
         .execute()
 
-      if (result.code != 200) {
+      if (result.code != 201) {
         logging.error(s"ES Response: ${result.body}")
         throw new Exception(s"Elasticsearch returned status ${result.code} while indexing document with name $documentId")
       }

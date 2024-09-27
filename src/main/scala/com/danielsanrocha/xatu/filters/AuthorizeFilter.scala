@@ -38,11 +38,11 @@ class AuthorizeFilter(authorizationHeader: String, implicit val cachePool: Jedis
         cache.get(s"token:$header") match {
           case null =>
             cache.close()
-            logging.debug(s"(x-request-id - ${requestId}) User sent header Authorization: ${header} which do not exist on the cache server!")
+            logging.debug(s"(x-request-id - ${requestId}) User sent header Authorization: which do not exist on the cache server!")
             val errorResponse = Response()
             errorResponse.statusCode = 403
             errorResponse.setContentTypeJson()
-            errorResponse.setContentString(jsonMapper.writeValueAsString(ServerMessage(s"Token ${header} was not found in the cache server! Try to login again", requestId)))
+            errorResponse.setContentString(jsonMapper.writeValueAsString(ServerMessage(s"Token was not found in the cache server! Try to login again", requestId)))
             Future(errorResponse)
 
           case credentialJson =>
