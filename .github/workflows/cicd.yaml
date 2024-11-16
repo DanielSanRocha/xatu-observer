@@ -46,6 +46,9 @@ jobs:
         uses: blag/action-docker-compose@latest
         with:
           cli-args: "--profile all up --build --wait"
+      - name: Wait 30 seconds
+        shell: bash
+        run: sleep 30
       - name: Integration test
         uses: enflo/curl-action@master
         with:
