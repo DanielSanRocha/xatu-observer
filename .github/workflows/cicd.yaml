@@ -14,6 +14,8 @@ jobs:
       NODE_OPTIONS: "--openssl-legacy-provider"
     steps:
       - uses: actions/checkout@v4
+      - name: Install curl
+        run: sudo apt-get install -y curl
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -50,9 +52,8 @@ jobs:
         shell: bash
         run: sleep 30
       - name: Integration test
-        uses: enflo/curl-action@master
-        with:
-          curl: "-w 'Status Code: %{http_code}\n' --connect-timeout 20 --max-time 20 --fail-with-body http://localhost:8089/api/healthcheck"
+        shell: bash
+        run: "curl -w 'Status Code: %{http_code}\n' --connect-timeout 20 --max-time 20 --fail-with-body http://localhost:8089/api/healthcheck"
       - name: Upload assembly jar
         uses: actions/upload-artifact@v4
         with:
