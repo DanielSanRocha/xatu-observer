@@ -1,0 +1,76 @@
+name: cicd
+run-name: ${{ github.actor }} is running CI/CD for Xatu Observer!
+on: [push]
+jobs:
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+      ROOT_LOG_LEVEL: ERROR
+      LOG_LEVEL: INFO
+      PORT: 8089
+      REDIS_PASSWORD: redis
+      NODE_OPTIONS: "--openssl-legacy-provider"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - name: Set Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Run yarn install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: --cwd web install
+      - name: Run yarn generate
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: --cwd web generate
+      - name: Copy Dist Folder
+        shell: bash
+        run: cp -r ./web/dist ./src/main/resources
+      - name: Assembly
+        shell: bash
+        run: sbt -v +assembly
+      - name: Copy Jar
+        shell: bash
+        run: cp target/scala-2.13/xatu-observer-assembly-3.1.0.jar xatu.jar
+      - name: Up docker-compose
+        uses: blag/action-docker-compose@latest
+        with:
+          cli-args: "--profile all up --build --wait"
+      - name: Integration test
+        uses: enflo/curl-action@master
+        with:
+          curl: "-w 'Status Code: %{http_code}\n' --connect-timeout 20 --max-time 20 --fail-with-body http://localhost:8089/api/healthcheck"
+      - name: Upload assembly jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: xatu.jar
+          path: ./xatu.jar
+          if-no-files-found: error
+          overwrite: 'true'
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - name: Run all unit tests
+        shell: bash
+        run: sbt -v +test
