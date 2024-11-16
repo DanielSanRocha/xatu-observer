@@ -11,7 +11,7 @@ import com.danielsanrocha.xatu.services.LogService
 class LogController(implicit val service: LogService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/logs") { request: LogSearchRequest =>
+  get("/api/logs") { request: LogSearchRequest =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Search logs called, returning result...")
     service.search(request.query) map { result =>

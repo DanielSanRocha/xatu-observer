@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.Logger
 class IndexController() extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/") { _: Request =>
+  get("/api") { _: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Index route called, returning ok...")
     response.ok(ServerMessage("Welcome to Xatu Observer!", requestId))

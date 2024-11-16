@@ -6,6 +6,7 @@ WORKDIR /app
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
+COPY input.txt /app/input.txt
 COPY xatu.jar /app/xatu.jar
 
-ENTRYPOINT ["/app/start.sh", "/app/xatu.jar"]
+ENTRYPOINT ["/app/start.sh", "/app/xatu.jar", "/app/input.txt"]

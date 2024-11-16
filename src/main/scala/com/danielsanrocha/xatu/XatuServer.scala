@@ -80,6 +80,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
   private val logController = new LogController()
   private val containerController = new ContainerController()
   private val corsController = new CORSController()
+  private val webController = new WebController()
 
   logging.info("Instantiating filters...")
   private val exceptionHandlerFilter = new ExceptionHandlerFilter()
@@ -105,6 +106,7 @@ class XatuServer(implicit val client: Database, implicit val ec: scala.concurren
       .add(authorizeFilter, containerController)
       .add(authorizeFilter, greatManager.statusController)
       .add(healthcheckController)
+      .add(webController)
       .add(notFoundController)
       .add(corsController)
   }

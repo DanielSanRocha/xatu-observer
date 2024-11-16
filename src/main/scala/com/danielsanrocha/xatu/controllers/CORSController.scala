@@ -7,5 +7,5 @@ import com.typesafe.scalalogging.Logger
 class CORSController extends Controller {
   val logging: Logger = Logger(this.getClass)
 
-  options("/:*") { _: Request => response.ok("*") }
+  options("/api/:*") { _: Request => response.ok("*") }
 }

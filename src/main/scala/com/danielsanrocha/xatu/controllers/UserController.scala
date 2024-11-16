@@ -12,7 +12,7 @@ import com.danielsanrocha.xatu.services.{UserService}
 class UserController(implicit service: UserService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/user") { request: Request =>
+  get("/api/user") { request: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) User route called, returning user info...")
 

@@ -2,6 +2,8 @@ services:
   mysql:
     container_name: xatu-mysql
     image: "mysql:8.0.32"
+    ports:
+      - 3306:3306
     networks:
       - xatu_network
     environment:
@@ -13,10 +15,15 @@ services:
       interval: 2s
       timeout: 60s
       retries: 30
+    profiles:
+      - all
+      - daemon
       
   redis:
     container_name: xatu-redis
     image: "redis:5.0.7-alpine"
+    ports:
+      - 6379:6379
     networks:
       - xatu_network
     healthcheck:
@@ -24,10 +31,15 @@ services:
       interval: 2s
       timeout: 60s
       retries: 30
+    profiles:
+      - all
+      - daemon
 
   elasticsearch:
     container_name: xatu-elasticsearch
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.17.9"
+    ports:
+      - 9200:9200
     networks:
       - xatu_network
     environment:
@@ -39,6 +51,9 @@ services:
       interval: 2s
       timeout: 60s
       retries: 30
+    profiles:
+      - all
+      - daemon
 
   xatu:
     container_name: xatu
@@ -72,6 +87,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    profiles:
+      - all
 networks:
   xatu_network:
     driver: bridge

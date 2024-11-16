@@ -17,7 +17,7 @@ class LoginController(implicit val service: UserService, implicit val cachePool:
   private val logging: Logger = Logger(this.getClass)
   private val jsonMapper = JsonMapper.builder().addModule(DefaultScalaModule).build()
 
-  post("/login") { credential: Credential =>
+  post("/api/login") { credential: Credential =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Login route called, searching for user...")
 

@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.Logger
 class NotFoundController() extends Controller {
   val logging: Logger = Logger(this.getClass)
 
-  get("/:*") { request: Request =>
+  get("/api/:*") { request: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Fallback GET route called, returning 404...")
     response.notFound(ServerMessage("Route not found", requestId))

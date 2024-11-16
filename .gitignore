@@ -48,3 +48,5 @@ META-INF
 output.json
 xatu.jar
 start
+
+src/main/resources/dist

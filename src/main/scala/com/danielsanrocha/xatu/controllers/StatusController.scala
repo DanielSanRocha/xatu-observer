@@ -16,7 +16,7 @@ class StatusController(
 ) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/status") { _: Request =>
+  get("/api/status") { _: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Status route called, returning managers info...")
 

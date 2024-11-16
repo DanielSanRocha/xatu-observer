@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.Logger
 class ServiceController(implicit service: ServiceService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/service/:id") { id: Id =>
+  get("/api/service/:id") { id: Id =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) GET service route called...")
     service.getById(id.id) map {
@@ -21,13 +21,13 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     }
   }
 
-  post("/service") { s: NewService =>
+  post("/api/service") { s: NewService =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) POST service route called...")
     service.create(s) map { id => response.ok(Created(id, requestId)) }
   }
 
-  put("/service/:id") { s: ServiceRequest =>
+  put("/api/service/:id") { s: ServiceRequest =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) PUT service/:id route called...")
 
@@ -37,7 +37,7 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     }
   }
 
-  delete("/service/:id") { id: Id =>
+  delete("/api/service/:id") { id: Id =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Delete service route called...")
 
@@ -47,7 +47,7 @@ class ServiceController(implicit service: ServiceService, implicit val ec: scala
     }
   }
 
-  get("/services") { request: GetAll =>
+  get("/api/services") { request: GetAll =>
     service.getAll(request.limit, request.offset) map { services =>
       {
         response.ok(HitsResult(services.length, services))

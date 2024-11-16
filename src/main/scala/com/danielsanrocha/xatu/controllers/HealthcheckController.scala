@@ -26,7 +26,7 @@ class HealthcheckController(
 ) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/healthcheck") { _: Request =>
+  get("/api/healthcheck") { _: Request =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Healthcheck called, checking redis, docker, elasticsearch and mysql...")
 

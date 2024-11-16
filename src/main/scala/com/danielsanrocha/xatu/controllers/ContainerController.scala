@@ -13,7 +13,7 @@ import com.danielsanrocha.xatu.services.ContainerService
 class ContainerController(implicit service: ContainerService, implicit val ec: scala.concurrent.ExecutionContext) extends Controller {
   private val logging: Logger = Logger(this.getClass)
 
-  get("/container/:id") { id: Id =>
+  get("/api/container/:id") { id: Id =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) GET container route called...")
     service.getById(id.id) map {
@@ -22,13 +22,13 @@ class ContainerController(implicit service: ContainerService, implicit val ec: s
     }
   }
 
-  post("/container") { s: NewContainer =>
+  post("/api/container") { s: NewContainer =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) POST container route called...")
     service.create(s) map { id => response.ok(Created(id, requestId)) }
   }
 
-  delete("/container/:id") { id: Id =>
+  delete("/api/container/:id") { id: Id =>
     val requestId = Contexts.local.get(RequestId).head.requestId
     logging.info(s"(x-request-id - $requestId) Delete container route called...")
 
@@ -38,7 +38,7 @@ class ContainerController(implicit service: ContainerService, implicit val ec: s
     }
   }
 
-  get("/containers") { request: GetAll =>
+  get("/api/containers") { request: GetAll =>
     service.getAll(request.limit, request.offset) map { containers =>
       {
         response.ok(HitsResult(containers.length, containers))

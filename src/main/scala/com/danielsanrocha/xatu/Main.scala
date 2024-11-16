@@ -4,12 +4,15 @@ import com.typesafe.scalalogging.Logger
 import slick.jdbc.MySQLProfile.api._
 
 import scala.io.Source
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import com.danielsanrocha.xatu.commons.Security
 import com.danielsanrocha.xatu.repositories.{LogRepository, LogRepositoryImpl}
-import scala.concurrent.ExecutionContext.Implicits.{global => ec}
+import com.typesafe.config.{Config, ConfigFactory}
+
+import java.util.Scanner
+import java.util.concurrent.Executors
 
 object Main extends App {
   private val usage = """
@@ -29,6 +32,9 @@ object Main extends App {
   logging.info("Testing logging.info")
   logging.debug("Testing logging.debug")
   logging.trace("Testing logging.trace")
+
+  private implicit val conf: Config = ConfigFactory.load()
+  private implicit val ec: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(conf.getInt("num_threads")))
 
   if (args.length == 0) {
     println(usage)
@@ -64,21 +70,24 @@ object Main extends App {
         logging.info("Creating tb_containers table...")
         val containerQuery = Source.fromResource("queries/CreateContainersTable.sql").mkString
         Await.result(client.run(sqlu"#$containerQuery"), atMost = 10 second)
+        logging.info("Created!\n")
 
       case "createIndex" =>
         logging.info("Creating index...")
         Await.result(logRepository.createIndex(), atMost = 10 second)
+        logging.info("Created!\n")
+        sys.exit(0)
 
       case "createUser" =>
-        val stdin = System.console()
+        val stdin = new Scanner(System.in);
         println("Enter username:")
-        val name = stdin.readLine()
+        val name = stdin.nextLine()
         println("Enter email:")
-        val email = stdin.readLine()
+        val email = stdin.nextLine()
         println("Enter password:")
-        val password = stdin.readPassword().mkString
+        val password = stdin.nextLine().mkString
         println("Confirm password:")
-        val confirmPassword = stdin.readPassword().mkString
+        val confirmPassword = stdin.nextLine().mkString
 
         if (password != confirmPassword) {
           throw new Exception("Password did not match!")
@@ -86,7 +95,7 @@ object Main extends App {
 
         logging.info("Creating user...")
         Await.result(client.run(sqlu"INSERT INTO tb_users (name,email,password) VALUES ($name,$email,${Security.hash(password)});"), atMost = 10 second)
-        logging.info("Created!")
+        logging.info("Created!\n")
 
       case _ => println(usage)
     }

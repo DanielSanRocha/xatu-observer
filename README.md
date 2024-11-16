@@ -3,11 +3,10 @@
 ![xatu](assets/xatu.jpg?raw=true)
 ![screenshot](assets/screenshot.png?raw=true)
 
-Application for monitoring apis, docker images and services. Also check [xatu-observer-web](https://github.com/DanielSanRocha/xatu-observer-web) for a web frontend to this service.
-
+Application for monitoring apis, docker images and services. 
 ## Introduction
 
-xatuobserver + [xatuobserver-web](github.com/DanielSanRocha/xatu-observer-web)) is a simple stack for monitoring docker containers, services and APIs.
+xatuobserver is a simple stack for monitoring docker containers, services and APIs.
 It has built-in logging collection (powered by ElasticSearch) with a search command for quicker debugging.
 It has Telegram integration, after creating a new bot you can configure to be notified of any down resource via Telegram!
 
@@ -16,6 +15,7 @@ It has Telegram integration, after creating a new bot you can configure to be no
 To run the project you need 
 - sbt >= 1.8.0
 - java (openjdk 11)
+- node and yarn
 
 ## Installation
 
@@ -95,7 +95,7 @@ the generated jar file will be inside the root folder with the name 'xatu.jar'.
 
 Set all required environment variables and simple run
 ```bash
-make run
+make start
 ```
 
 ## Unit tests
@@ -124,9 +124,11 @@ make start-docker
 
 the service will run on port 8089. Check it is working properly with the commands:
 ```bash
-curl -f localhost:8089/
-curl -f localhost:8089/healthcheck
+curl -f localhost:8089
+curl -f localhost:8089/api/healthcheck
 ```
+
+The default user email is 'xatu@mail.com' and password 'xatu'.
 
 ## Environment Variables
 
@@ -138,6 +140,7 @@ These environment variables can be used to configure the service. For more infor
 ```bash
 LOG_LEVEL=trace make test-integration-docker 
 ```
+- NUM_THREADS: Number of threads for the service.
 - ROOT_LOG_LEVEL: Control the LOG_LEVEL for all dependencies of the project.
 - MYSQL_HOST: Host for MySQL Database.
 - MYSQL_PORT: Port for MYSQL Database.
