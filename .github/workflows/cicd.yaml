@@ -48,9 +48,9 @@ jobs:
         uses: blag/action-docker-compose@latest
         with:
           cli-args: "--profile all up --build --wait"
-      - name: Wait 30 seconds
+      - name: Wait 15 seconds
         shell: bash
-        run: sleep 30
+        run: sleep 15
       - name: Integration test
         shell: bash
         run: "curl -w 'Status Code: %{http_code}\n' --connect-timeout 20 --max-time 20 --fail-with-body http://localhost:8089/api/healthcheck"
