@@ -11,7 +11,7 @@ class CORSControllerSpec extends UnitSpec with TestController {
 
   describe("Options CORSController") {
     it("should return ok to options anywhere") {
-      val response = server.httpOptions("/path/to/anywhere", andExpect = Status.Ok)
+      val response = server.httpOptions("/api/path/to/anywhere", andExpect = Status.Ok)
       Future {
         response.status.code should equal(200)
       }

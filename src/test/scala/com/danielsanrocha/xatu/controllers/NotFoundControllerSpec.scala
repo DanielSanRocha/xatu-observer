@@ -12,7 +12,7 @@ class NotFoundControllerSpec extends UnitSpec with TestController {
 
   describe("Path to anywhere") {
     it("should return 404 in GET to anywhere") {
-      val result = server.httpGetJson[ServerMessage]("/path/to/anywhere", andExpect = Status.NotFound)
+      val result = server.httpGetJson[ServerMessage]("/api/path/to/anywhere", andExpect = Status.NotFound)
       Future {
         result.requestId should equal("test")
         result.message.toLowerCase should include("not found")
@@ -20,7 +20,7 @@ class NotFoundControllerSpec extends UnitSpec with TestController {
     }
 
     it("should return 404 in POST to anywhere") {
-      val result = server.httpPostJson[ServerMessage]("/somewhere/over/the/rainbow", postBody = "{\"message\": \"OK\"}", andExpect = Status.NotFound)
+      val result = server.httpPostJson[ServerMessage]("/api/somewhere/over/the/rainbow", postBody = "{\"message\": \"OK\"}", andExpect = Status.NotFound)
       Future {
         result.requestId should equal("test")
         result.message.toLowerCase should include("not found")
@@ -28,7 +28,7 @@ class NotFoundControllerSpec extends UnitSpec with TestController {
     }
 
     it("should return 404 in PUT to anywhere") {
-      val result = server.httpPutJson[ServerMessage]("/somewhere/over/the/rainbow", putBody = "{\"message\": \"OK\"}", andExpect = Status.NotFound)
+      val result = server.httpPutJson[ServerMessage]("/api/somewhere/over/the/rainbow", putBody = "{\"message\": \"OK\"}", andExpect = Status.NotFound)
       Future {
         result.requestId should equal("test")
         result.message.toLowerCase should include("not found")
@@ -36,7 +36,7 @@ class NotFoundControllerSpec extends UnitSpec with TestController {
     }
 
     it("should return 404 in PATCH to anywhere") {
-      val result = server.httpPatchJson[ServerMessage]("/somewhere/over/the/rainbow", patchBody = "{\"message\": \"OK\"}", andExpect = Status.NotFound)
+      val result = server.httpPatchJson[ServerMessage]("/api/somewhere/over/the/rainbow", patchBody = "{\"message\": \"OK\"}", andExpect = Status.NotFound)
       Future {
         result.requestId should equal("test")
         result.message.toLowerCase should include("not found")
@@ -44,7 +44,7 @@ class NotFoundControllerSpec extends UnitSpec with TestController {
     }
 
     it("should return 404 in DELETE to anywhere") {
-      val result = server.httpDeleteJson[ServerMessage]("/somewhere/over/the/rainbow", deleteBody = "", andExpect = Status.NotFound)
+      val result = server.httpDeleteJson[ServerMessage]("/api/somewhere/over/the/rainbow", deleteBody = "", andExpect = Status.NotFound)
       Future {
         result.requestId should equal("test")
         result.message.toLowerCase should include("not found")

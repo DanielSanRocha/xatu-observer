@@ -7,13 +7,13 @@ import com.twitter.finagle.http.Status
 import scala.concurrent.Future
 
 class IndexControllerSpec extends UnitSpec with TestController {
-  describe("GET /") {
+  describe("GET /api") {
     it("should return ok") {
       val controller = new IndexController()
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerMessage]("/", andExpect = Status.Ok)
+        val response = server.httpGetJson[ServerMessage]("/api", andExpect = Status.Ok)
         response.message should equal("Welcome to Xatu Observer!")
         response.requestId should equal("test")
       }

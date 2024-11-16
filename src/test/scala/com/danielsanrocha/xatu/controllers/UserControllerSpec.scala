@@ -15,7 +15,7 @@ import scala.concurrent.Future
 class UserControllerSpec extends UnitSpec with TestController with TestRepository {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  describe("GET /user") {
+  describe("GET /api/user") {
     it("should return the user") {
       implicit val service: UserService = mock(classOf[UserService])
       val controller = new UserController()
@@ -27,7 +27,7 @@ class UserControllerSpec extends UnitSpec with TestController with TestRepositor
       val server = createServer(controller, credential)
 
       Future {
-        val result = server.httpGetJson[UserResponse]("/user", andExpect = Status.Ok)
+        val result = server.httpGetJson[UserResponse]("/api/user", andExpect = Status.Ok)
         verify(service, times(1)).getById(any)
         verify(service, times(1)).getById(10)
         result should equal(user)
@@ -44,7 +44,7 @@ class UserControllerSpec extends UnitSpec with TestController with TestRepositor
       val server = createServer(controller, credential)
 
       Future {
-        val result = server.httpGetJson[ServerMessage]("/user", andExpect = Status.InternalServerError)
+        val result = server.httpGetJson[ServerMessage]("/api/user", andExpect = Status.InternalServerError)
         verify(service, times(1)).getById(any)
         verify(service, times(1)).getById(10)
         result.message should include("strange")

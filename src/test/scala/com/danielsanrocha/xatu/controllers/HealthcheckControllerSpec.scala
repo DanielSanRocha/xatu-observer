@@ -21,7 +21,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   implicit val timeout: FiniteDuration = new FiniteDuration(1, TimeUnit.SECONDS)
 
-  describe("GET /healthcheck") {
+  describe("GET /api/healthcheck") {
     it("should return ok if all repositories are ok") {
       val cache: Jedis = mock[Jedis]
       implicit val cachePool: JedisPool = mock[JedisPool]
@@ -42,7 +42,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.Ok)
+        val response = server.httpGetJson[ServerStatus]("/api/healthcheck", andExpect = Status.Ok)
         verify(cache, times(1)).close()
         verify(cache, times(1)).close()
         response.redis should equal("Ok")
@@ -71,7 +71,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        val response = server.httpGetJson[ServerStatus]("/api/healthcheck", andExpect = Status.InternalServerError)
         verify(cache, times(1)).close()
         response.redis should not equal ("Ok")
         response.mysql should equal("Ok")
@@ -99,7 +99,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        val response = server.httpGetJson[ServerStatus]("/api/healthcheck", andExpect = Status.InternalServerError)
         verify(cache, times(1)).close()
         verify(cache, times(1)).close()
         response.redis should equal("Not working...")
@@ -125,7 +125,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        val response = server.httpGetJson[ServerStatus]("/api/healthcheck", andExpect = Status.InternalServerError)
         response.redis should equal("jujuba")
         response.mysql should equal("Ok")
         response.docker should equal("Ok")
@@ -155,7 +155,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        val response = server.httpGetJson[ServerStatus]("/api/healthcheck", andExpect = Status.InternalServerError)
         verify(cache, times(1)).close()
         verify(cache, times(1)).close()
         response.redis should equal("Ok")
@@ -186,7 +186,7 @@ class HealthcheckControllerSpec extends UnitSpec with TestController with TestRe
       val server = createServer(controller)
 
       Future {
-        val response = server.httpGetJson[ServerStatus]("/healthcheck", andExpect = Status.InternalServerError)
+        val response = server.httpGetJson[ServerStatus]("/api/healthcheck", andExpect = Status.InternalServerError)
         verify(cache, times(1)).close()
         verify(cache, times(1)).close()
         response.redis should equal("Ok")
