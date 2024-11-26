@@ -54,7 +54,7 @@ start-docker: env clean-docker assembly ## Start docker compose with all require
 start-docker-daemon: clean-docker ## Start required services (minus xatu itself) daemon.
 	docker compose --profile daemon up -d
 
-test-integration-docker: env clean-docker assembly ## Start docker compose and check all integrations.
+test-integration-docker: env clean clean-docker assembly ## Start docker compose and check all integrations.
 	@echo "Starting services..."
 	docker compose --profile all up --build -d --wait
 	@echo "Testing healthcheck..."
