@@ -1,4 +1,21 @@
 {
+  "settings": {
+    "index": {
+      "analysis": {
+        "filter": {},
+        "analyzer": {
+          "keyword_analyzer": {
+            "filter": [
+              "lowercase",
+              "trim"
+            ],
+            "tokenizer": "whitespace",
+            "type": "custom"
+          }
+        }
+      }
+    }
+  },
   "mappings": {
     "properties": {
       "container_name": {
@@ -13,12 +30,13 @@
       "message": {
         "type": "text",
         "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
+          "keywords": {
+            "type": "text",
+            "analyzer": "keyword_analyzer"
           }
         }
       }
     }
   }
 }
+
